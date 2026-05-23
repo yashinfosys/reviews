@@ -8,7 +8,7 @@ import { Eye, EyeOff, Loader2, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-export function LoginForm() {
+export function LoginForm({ configError }: { configError?: string }) {
   const router = useRouter();
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -16,6 +16,10 @@ export function LoginForm() {
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (configError) {
+      setError(configError);
+      return;
+    }
     setError("");
     setLoading(true);
     const form = new FormData(event.currentTarget);
@@ -26,7 +30,7 @@ export function LoginForm() {
     });
     setLoading(false);
     if (result?.error) {
-      setError("Invalid email or password.");
+      setError(result.error === "DATABASE_MISSING" ? "Database connection missing. Please configure DATABASE_URL." : "Invalid email or password.");
       return;
     }
     router.refresh();
@@ -55,6 +59,7 @@ export function LoginForm() {
         {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
         {loading ? "Signing in..." : "Login"}
       </Button>
+      {configError ? <p className="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">{configError}</p> : null}
       {error ? <p className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">{error}</p> : null}
     </form>
   );

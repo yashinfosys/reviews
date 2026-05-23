@@ -4,9 +4,10 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import type { Role } from "@prisma/client";
 import { authenticate } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { hasDatabaseUrl } from "@/lib/env";
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
+  ...(hasDatabaseUrl() ? { adapter: PrismaAdapter(prisma) } : {}),
   session: { strategy: "jwt" },
   secret: process.env.NEXTAUTH_SECRET,
   providers: [
@@ -17,6 +18,7 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
+        if (!hasDatabaseUrl()) throw new Error("DATABASE_MISSING");
         if (!credentials?.email || !credentials.password) return null;
         const user = await authenticate(credentials.email, credentials.password);
         if (!user) return null;
@@ -48,6 +50,7 @@ export const authOptions: NextAuthOptions = {
     }
   },
   pages: {
-    signIn: "/login"
+    signIn: "/login",
+    error: "/auth/error"
   }
 };
