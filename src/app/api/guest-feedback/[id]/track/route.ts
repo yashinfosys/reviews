@@ -12,7 +12,9 @@ export async function POST(request: Request, { params }: { params: { id: string 
     data: {
       platformClicked: body.platform in Platform ? body.platform : Platform.CUSTOM,
       copiedReview: body.copiedReview,
-      otaPostedStatus: body.otaPostedStatus || (body.platform ? "PENDING_CONFIRMATION" : undefined)
+      selectedReviewVersion: body.selectedReviewVersion,
+      otaPostedStatus: body.otaPostedStatus || (body.platform ? "PENDING_CONFIRMATION" : undefined),
+      postedConfirmation: body.postedConfirmation || body.otaPostedStatus
     }
   });
   return NextResponse.json({ ok: true });

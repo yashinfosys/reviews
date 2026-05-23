@@ -19,9 +19,11 @@ export async function POST(request: Request) {
   const rating = Number(form.get("rating") || 5);
   const feedbackText = String(form.get("feedbackText") || "");
   const keywords = JSON.parse(String(form.get("keywords") || "[]")) as string[];
+  const selectedKeywords = JSON.parse(String(form.get("selectedKeywords") || "[]")) as string[];
+  const realFeedbackText = feedbackText || selectedKeywords.join(", ") || visitType;
 
   if (isDemoMode()) {
-    const suggestions = demoGuestSuggestions(feedbackText);
+    const suggestions = demoGuestSuggestions(realFeedbackText);
     return NextResponse.json({
       feedbackId: `demo-feedback-${Date.now()}`,
       suggestions,
@@ -39,8 +41,9 @@ export async function POST(request: Request) {
     category: business.category,
     visitType,
     rating,
-    feedbackText,
-    keywords
+    feedbackText: realFeedbackText,
+    keywords,
+    selectedKeywords
   });
 
   const feedback = await prisma.guestFeedback.create({
@@ -52,8 +55,10 @@ export async function POST(request: Request) {
       mobile,
       visitType,
       rating,
-      feedbackText,
-      aiSuggestionsJson: suggestions
+      feedbackText: realFeedbackText,
+      selectedKeywords,
+      aiSuggestionsJson: suggestions,
+      generatedReview: suggestions
     }
   });
 
@@ -68,7 +73,7 @@ export async function POST(request: Request) {
         platform: Platform.CUSTOM,
         rating,
         issueCategory: "Guest Feedback",
-        reviewText: feedbackText,
+        reviewText: realFeedbackText,
         priority: rating <= 2 ? "High" : "Medium",
         slaDueAt: new Date(Date.now() + 1000 * 60 * 60 * 24)
       }

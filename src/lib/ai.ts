@@ -11,6 +11,7 @@ type GuestSuggestionInput = {
   rating: number;
   feedbackText: string;
   keywords: string[];
+  selectedKeywords?: string[];
 };
 
 export type GuestSuggestions = {
@@ -18,8 +19,6 @@ export type GuestSuggestions = {
   detailedSeoEnglish: string;
   hindi: string;
   hinglish: string;
-  luxuryTone: string;
-  familyCorporateTone: string;
 };
 
 export async function generateGuestReviewSuggestions(input: GuestSuggestionInput): Promise<GuestSuggestions> {
@@ -32,10 +31,17 @@ City: ${input.city}
 Category: ${input.category}
 Visit type: ${input.visitType}
 Rating: ${input.rating}
-Guest text: ${input.feedbackText}
+Guest optional comment: ${input.feedbackText || "No long comment provided"}
+Guest selected experience keywords: ${(input.selectedKeywords || []).join(", ")}
 Relevant SEO keywords, use naturally only when true: ${input.keywords.join(", ")}
 
-Return JSON with keys shortEnglish, detailedSeoEnglish, hindi, hinglish, luxuryTone, familyCorporateTone.`;
+Rules:
+- Use only the rating, selected keywords, optional comment, business category, and city as evidence.
+- Use keywords naturally and avoid keyword stuffing.
+- Make each review human-written and ready for manual guest approval.
+- Do not invent facts, incentives, or fake engagement.
+
+Return JSON with keys shortEnglish, detailedSeoEnglish, hindi, hinglish.`;
 
   try {
     const response = await openai.chat.completions.create({
@@ -102,15 +108,15 @@ export async function analyzeReview(reviewText: string, rating?: number | null) 
 }
 
 function buildGuestSuggestionFallback(input: GuestSuggestionInput): GuestSuggestions {
+  const selected = input.selectedKeywords?.length ? input.selectedKeywords.join(", ") : input.visitType;
+  const comment = input.feedbackText ? ` ${input.feedbackText}` : "";
   const keyword = input.keywords[0] ? ` ${input.keywords[0]}` : "";
-  const base = `${input.businessName} gave us a genuine ${input.visitType.toLowerCase()} experience in ${input.city}. ${input.feedbackText}`;
+  const base = `${input.businessName} gave us a genuine ${input.visitType.toLowerCase()} experience in ${input.city}. Highlights: ${selected}.${comment}`;
   return {
-    shortEnglish: `${base}`,
+    shortEnglish: base,
     detailedSeoEnglish: `${base}${keyword ? ` It is a good option for guests looking for${keyword}.` : ""}`,
-    hindi: `${input.businessName} में हमारा अनुभव अच्छा रहा। ${input.feedbackText}`,
-    hinglish: `${input.businessName} ka experience kaafi accha raha. ${input.feedbackText}`,
-    luxuryTone: `A refined and comfortable experience at ${input.businessName}. ${input.feedbackText}`,
-    familyCorporateTone: `${input.businessName} is a convenient choice for family or business visits. ${input.feedbackText}`
+    hindi: `${input.businessName} mein hamara anubhav achha raha. ${selected} pasand aaya.${comment}`,
+    hinglish: `${input.businessName} ka experience kaafi accha raha. ${selected} really achha laga.${comment}`
   };
 }
 

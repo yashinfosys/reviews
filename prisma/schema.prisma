@@ -225,10 +225,14 @@ model GuestFeedback {
   rating            Int
   visitType         String
   feedbackText      String
+  selectedKeywords  Json?
   aiSuggestionsJson Json
+  generatedReview   Json?
   copiedReview      String?
+  selectedReviewVersion String?
   platformClicked   Platform?
   otaPostedStatus   String    @default("NOT_STARTED")
+  postedConfirmation String   @default("NOT_ASKED")
   followUpStatus    String    @default("NONE")
   complaintTicket   ComplaintTicket?
   createdAt         DateTime  @default(now())

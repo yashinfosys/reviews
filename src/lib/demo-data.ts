@@ -85,8 +85,6 @@ export function demoGuestSuggestions(feedbackText: string): GuestSuggestions {
     shortEnglish: `We had a genuine experience at ${demoBusiness.name}. ${feedbackText}`,
     detailedSeoEnglish: `${demoBusiness.name} offered a comfortable visit in Lucknow. ${feedbackText}`,
     hindi: `${demoBusiness.name} में हमारा अनुभव वास्तविक और अच्छा रहा। ${feedbackText}`,
-    hinglish: `${demoBusiness.name} ka experience kaafi accha raha. ${feedbackText}`,
-    luxuryTone: `A refined and comfortable experience at ${demoBusiness.name}. ${feedbackText}`,
-    familyCorporateTone: `${demoBusiness.name} is convenient for family and business visits. ${feedbackText}`
+    hinglish: `${demoBusiness.name} ka experience kaafi accha raha. ${feedbackText}`
   };
 }
