@@ -17,12 +17,27 @@ type Business = {
   bookingLink?: string | null;
   zomatoLink?: string | null;
   swiggyLink?: string | null;
+  makeMyTripLink?: string | null;
+  goibiboLink?: string | null;
+  agodaLink?: string | null;
 };
 
-export function GuestFeedbackForm({ business, locationId, keywords, defaultVisitType }: { business: Business; locationId?: string; keywords: string[]; defaultVisitType: string }) {
+type QRContext = {
+  id?: string;
+  qrType?: string;
+  label?: string;
+  roomNo?: string | null;
+  tableNo?: string | null;
+  eventName?: string | null;
+  staffId?: string | null;
+  platformTarget?: string | null;
+};
+
+export function GuestFeedbackForm({ business, locationId, keywords, defaultVisitType, qrContext }: { business: Business; locationId?: string; keywords: string[]; defaultVisitType: string; qrContext?: QRContext }) {
   const [rating, setRating] = useState(5);
   const [suggestions, setSuggestions] = useState<GuestSuggestions | null>(null);
   const [feedbackId, setFeedbackId] = useState("");
+  const [postedStatus, setPostedStatus] = useState("");
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -30,6 +45,7 @@ export function GuestFeedbackForm({ business, locationId, keywords, defaultVisit
     form.set("rating", String(rating));
     form.set("businessId", business.id);
     if (locationId) form.set("locationId", locationId);
+    if (qrContext?.id) form.set("qrCodeId", qrContext.id);
     form.set("keywords", JSON.stringify(keywords));
     const response = await fetch("/api/guest-feedback", { method: "POST", body: form });
     const data = await response.json();
@@ -37,13 +53,14 @@ export function GuestFeedbackForm({ business, locationId, keywords, defaultVisit
     setFeedbackId(data.feedbackId);
   }
 
-  async function track(platform: string, review?: string) {
+  async function track(platform: string, review?: string, otaPostedStatus?: string) {
     if (feedbackId) {
       await fetch(`/api/guest-feedback/${feedbackId}/track`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ platform, copiedReview: review })
+        body: JSON.stringify({ platform, copiedReview: review, otaPostedStatus })
       });
+      if (otaPostedStatus) setPostedStatus(otaPostedStatus);
     }
   }
 
@@ -52,11 +69,17 @@ export function GuestFeedbackForm({ business, locationId, keywords, defaultVisit
     ["Post on Tripadvisor", business.tripadvisorLink, "TRIPADVISOR"],
     ["Post on Booking.com", business.bookingLink, "BOOKING"],
     ["Post on Zomato", business.zomatoLink, "ZOMATO"],
-    ["Post on Swiggy", business.swiggyLink, "SWIGGY"]
+    ["Post on Swiggy", business.swiggyLink, "SWIGGY"],
+    ["Post on MMT", business.makeMyTripLink, "MAKEMYTRIP"],
+    ["Post on Goibibo", business.goibiboLink, "GOIBIBO"],
+    ["Post on Agoda", business.agodaLink, "AGODA"]
   ];
+  const contextLine = qrContext?.roomNo ? `Room ${qrContext.roomNo}` : qrContext?.tableNo ? `Table ${qrContext.tableNo}` : qrContext?.eventName ? qrContext.eventName : qrContext?.staffId ? `Staff feedback: ${qrContext.staffId}` : qrContext?.label;
+  const complaintMode = qrContext?.qrType === "COMPLAINT";
 
   return (
     <div className="mt-6">
+      {contextLine ? <div className="mb-4 rounded-md bg-teal-50 p-3 text-sm font-medium text-teal-900">{contextLine}</div> : null}
       {!suggestions ? (
         <form onSubmit={submit} className="grid gap-4">
           <Input name="guestName" required placeholder="Your name" />
@@ -71,7 +94,7 @@ export function GuestFeedbackForm({ business, locationId, keywords, defaultVisit
               </button>
             ))}
           </div>
-          <Textarea name="feedbackText" required placeholder="Tell us about your real experience in Hinglish, Hindi or English" />
+          <Textarea name="feedbackText" required placeholder={complaintMode ? "Tell us what went wrong so the manager can resolve it" : "Tell us about your real experience in Hinglish, Hindi or English"} />
           <Button>Generate Review Suggestions</Button>
         </form>
       ) : (
@@ -92,6 +115,14 @@ export function GuestFeedbackForm({ business, locationId, keywords, defaultVisit
                 {label} <ExternalLink className="h-4 w-4" />
               </a>
             ))}
+          </div>
+          <div className="rounded-md border bg-white p-4">
+            <div className="text-sm font-semibold">Have you posted the review?</div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Button type="button" variant="secondary" onClick={() => track(qrContext?.platformTarget || "CUSTOM", undefined, "POSTED_BY_GUEST")}>Yes, posted</Button>
+              <Button type="button" variant="ghost" onClick={() => track(qrContext?.platformTarget || "CUSTOM", undefined, "PENDING_CONFIRMATION")}>Not yet</Button>
+            </div>
+            {postedStatus ? <p className="mt-2 text-sm text-slate-600">Status saved: {postedStatus.replaceAll("_", " ")}</p> : null}
           </div>
         </div>
       )}

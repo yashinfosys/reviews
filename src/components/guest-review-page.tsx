@@ -3,6 +3,13 @@ import { prisma } from "@/lib/prisma";
 import { GuestFeedbackForm } from "@/components/guest-feedback-form";
 import { demoBusiness, isDemoMode } from "@/lib/demo-data";
 
+function visitTypeFromQr(qrType?: string) {
+  if (!qrType) return "Other";
+  if (qrType === "BANQUET_EVENT") return "Event";
+  if (qrType === "GENERAL_FEEDBACK") return "Other";
+  return qrType.replaceAll("_", " ");
+}
+
 export async function GuestReviewPage({ params }: { params: { businessSlug: string; locationSlug?: string; qrType?: string; label?: string } }) {
   if (isDemoMode()) {
     const location = demoBusiness.locations[0];
@@ -33,7 +40,15 @@ export async function GuestReviewPage({ params }: { params: { businessSlug: stri
     include: { locations: true, seoKeywords: true }
   });
   if (!business) notFound();
-  const location = params.locationSlug ? business.locations.find((item) => item.slug === params.locationSlug) : business.locations[0];
+  const qrCode = params.locationSlug
+    ? await prisma.qRCode.findFirst({ where: { id: params.locationSlug, businessId: business.id, isActive: true } })
+    : null;
+  if (qrCode) await prisma.qRCode.update({ where: { id: qrCode.id }, data: { scanCount: { increment: 1 } } });
+  const location = qrCode?.locationId
+    ? business.locations.find((item) => item.id === qrCode.locationId)
+    : params.locationSlug && !qrCode
+      ? business.locations.find((item) => item.slug === params.locationSlug)
+      : business.locations[0];
   return (
     <main className="min-h-screen bg-slate-100 px-4 py-8">
       <div className="mx-auto max-w-2xl rounded-lg border bg-white p-5 shadow-soft">
@@ -55,12 +70,25 @@ export async function GuestReviewPage({ params }: { params: { businessSlug: stri
             googleReviewLink: business.googleReviewLink,
             tripadvisorLink: business.tripadvisorLink,
             bookingLink: business.bookingLink,
+            makeMyTripLink: business.makeMyTripLink,
+            goibiboLink: business.goibiboLink,
+            agodaLink: business.agodaLink,
             zomatoLink: business.zomatoLink,
             swiggyLink: business.swiggyLink
           }}
           locationId={location?.id}
           keywords={business.seoKeywords.map((item) => item.keyword)}
-          defaultVisitType={params.qrType || "Other"}
+          defaultVisitType={visitTypeFromQr(qrCode?.qrType || params.qrType)}
+          qrContext={qrCode ? {
+            id: qrCode.id,
+            qrType: qrCode.qrType,
+            label: qrCode.label,
+            roomNo: qrCode.roomNo,
+            tableNo: qrCode.tableNo,
+            eventName: qrCode.eventName,
+            staffId: qrCode.staffId,
+            platformTarget: qrCode.platformTarget
+          } : undefined}
         />
       </div>
     </main>

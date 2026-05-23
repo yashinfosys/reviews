@@ -13,7 +13,7 @@ export default async function SuperBusinessesPage() {
         <div className="mt-6 rounded-lg border bg-white p-4 shadow-soft">
           <div className="font-semibold">{demoBusiness.name} · ACTIVE</div>
           <div className="mt-1 text-sm text-slate-500">PRO · {demoReviews.length} reviews · {demoQrCodes.length} QR</div>
-          <SuperBusinessActions businessId={demoBusiness.id} developerBranding={demoBusiness.developerBranding} />
+          <SuperBusinessActions businessId={demoBusiness.id} developerBranding={demoBusiness.developerBranding} customQrLimit={75} isCustomLimitEnabled />
         </div>
       </DashboardShell>
     );
@@ -27,8 +27,16 @@ export default async function SuperBusinessesPage() {
         {businesses.map((business) => (
           <div key={business.id} className="rounded-lg border bg-white p-4 shadow-soft">
           <div className="font-semibold">{business.name} · {business.status}</div>
-          <div className="mt-1 text-sm text-slate-500">{business.subscription?.plan || "STARTER"} · {business._count.reviews} reviews · {business._count.qrCodes} QR</div>
-          <SuperBusinessActions businessId={business.id} developerBranding={business.developerBranding} />
+          <div className="mt-1 text-sm text-slate-500">
+            {business.subscription?.plan || "STARTER"} · {business._count.reviews} reviews · {business._count.qrCodes} QR
+            {business.subscription?.isCustomLimitEnabled ? ` · custom limit ${business.subscription.customQrLimit}` : ""}
+          </div>
+          <SuperBusinessActions
+            businessId={business.id}
+            developerBranding={business.developerBranding}
+            customQrLimit={business.subscription?.customQrLimit}
+            isCustomLimitEnabled={business.subscription?.isCustomLimitEnabled}
+          />
         </div>
         ))}
       </div>

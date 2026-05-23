@@ -216,8 +216,10 @@ model GuestFeedback {
   id                String    @id @default(cuid())
   businessId        String
   locationId        String?
+  qrCodeId          String?
   business          Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
   location          Location? @relation(fields: [locationId], references: [id])
+  qrCode            QRCode?   @relation(fields: [qrCodeId], references: [id])
   guestName         String
   mobile            String?
   rating            Int
@@ -226,6 +228,8 @@ model GuestFeedback {
   aiSuggestionsJson Json
   copiedReview      String?
   platformClicked   Platform?
+  otaPostedStatus   String    @default("NOT_STARTED")
+  followUpStatus    String    @default("NONE")
   complaintTicket   ComplaintTicket?
   createdAt         DateTime  @default(now())
 }
@@ -238,11 +242,23 @@ model QRCode {
   location       Location? @relation(fields: [locationId], references: [id])
   qrType         String
   label          String
+  roomNo         String?
+  tableNo        String?
+  eventName      String?
+  staffId        String?
+  platformTarget Platform?
   destinationUrl String
   scanCount      Int       @default(0)
+  reviewCount    Int       @default(0)
+  complaintCount Int       @default(0)
+  conversionCount Int      @default(0)
   isActive       Boolean   @default(true)
+  feedback       GuestFeedback[]
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
+
+  @@index([businessId, qrType])
+  @@index([businessId, platformTarget])
 }
 
 model ComplaintTicket {
@@ -278,6 +294,8 @@ model Subscription {
   plan           SubscriptionPlan @default(STARTER)
   paymentStatus  PaymentStatus    @default(TRIAL)
   qrLimit        Int              @default(10)
+  customQrLimit  Int?
+  isCustomLimitEnabled Boolean    @default(false)
   aiUsageLimit   Int              @default(1000)
   reviewLimit    Int              @default(500)
   startsAt       DateTime         @default(now())

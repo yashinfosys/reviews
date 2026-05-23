@@ -12,6 +12,7 @@ export async function POST(request: Request) {
   const form = await request.formData();
   const businessId = String(form.get("businessId") || "");
   const locationId = String(form.get("locationId") || "") || undefined;
+  const qrCodeId = String(form.get("qrCodeId") || "") || undefined;
   const guestName = String(form.get("guestName") || "");
   const mobile = String(form.get("mobile") || "") || undefined;
   const visitType = String(form.get("visitType") || "Other");
@@ -46,6 +47,7 @@ export async function POST(request: Request) {
     data: {
       businessId,
       locationId,
+      qrCodeId,
       guestName,
       mobile,
       visitType,
@@ -69,6 +71,17 @@ export async function POST(request: Request) {
         reviewText: feedbackText,
         priority: rating <= 2 ? "High" : "Medium",
         slaDueAt: new Date(Date.now() + 1000 * 60 * 60 * 24)
+      }
+    });
+  }
+
+  if (qrCodeId) {
+    await prisma.qRCode.update({
+      where: { id: qrCodeId },
+      data: {
+        reviewCount: { increment: 1 },
+        conversionCount: { increment: 1 },
+        complaintCount: rating <= 3 ? { increment: 1 } : undefined
       }
     });
   }

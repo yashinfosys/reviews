@@ -8,6 +8,8 @@ const adminLinks = [
   { href: "/admin/integrations/google", label: "Google", icon: Globe2 },
   { href: "/admin/reply-generator", label: "AI Reply", icon: ClipboardList },
   { href: "/admin/qr", label: "QR Codes", icon: QrCode },
+  { href: "/admin/qr-analytics", label: "QR Analytics", icon: BarChart3 },
+  { href: "/admin/ota-reviews", label: "OTA Reviews", icon: ClipboardList },
   { href: "/admin/tickets", label: "Complaints", icon: Ticket },
   { href: "/admin/settings", label: "Business", icon: Settings }
 ];
