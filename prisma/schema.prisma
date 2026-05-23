@@ -1,0 +1,360 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  BUSINESS_ADMIN
+  MANAGER
+  STAFF
+}
+
+enum BusinessStatus {
+  ACTIVE
+  DISABLED
+}
+
+enum Platform {
+  GOOGLE
+  TRIPADVISOR
+  BOOKING
+  MAKEMYTRIP
+  GOIBIBO
+  AGODA
+  ZOMATO
+  SWIGGY
+  AIRBNB
+  CUSTOM
+}
+
+enum ReviewStatus {
+  NEW
+  PENDING_REPLY
+  REPLIED
+  ESCALATED
+  ARCHIVED
+}
+
+enum ComplaintStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum SubscriptionPlan {
+  STARTER
+  PRO
+  ENTERPRISE
+}
+
+enum PaymentStatus {
+  TRIAL
+  ACTIVE
+  PAST_DUE
+  CANCELLED
+}
+
+enum ConnectionStatus {
+  DISCONNECTED
+  CONNECTED
+  EXPIRED
+  ERROR
+}
+
+model User {
+  id            String       @id @default(cuid())
+  name          String
+  email         String       @unique
+  passwordHash  String
+  role          Role         @default(STAFF)
+  businessId    String?
+  business      Business?    @relation(fields: [businessId], references: [id])
+  reviewsPosted ReviewReply[] @relation("PostedReplies")
+  auditLogs     AuditLog[]
+  aiUsageLogs   AIUsageLog[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+model Business {
+  id                  String               @id @default(cuid())
+  name                String
+  slug                String               @unique
+  category            String
+  status              BusinessStatus       @default(ACTIVE)
+  logoUrl             String?
+  brandColor          String               @default("#0f766e")
+  address             String
+  city                String
+  phone               String?
+  whatsapp            String?
+  website             String?
+  welcomeMessage      String               @default("Thank you for visiting. Your honest feedback helps us improve.")
+  googleReviewLink    String?
+  tripadvisorLink     String?
+  bookingLink         String?
+  makeMyTripLink      String?
+  goibiboLink         String?
+  agodaLink           String?
+  zomatoLink          String?
+  swiggyLink          String?
+  developerBranding   String               @default("Designed & Developed by Yash Infosystems")
+  users               User[]
+  locations           Location[]
+  connections         PlatformConnection[]
+  reviews             Review[]
+  guestFeedback       GuestFeedback[]
+  qrCodes             QRCode[]
+  complaintTickets    ComplaintTicket[]
+  subscription        Subscription?
+  settings            BusinessSettings?
+  seoKeywords         SEOKeyword[]
+  notifications       Notification[]
+  aiUsageLogs         AIUsageLog[]
+  uploadedScreenshots UploadedScreenshot[]
+  auditLogs           AuditLog[]
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+}
+
+model Location {
+  id            String            @id @default(cuid())
+  businessId    String
+  business      Business          @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  name          String
+  slug          String
+  address       String
+  city          String
+  googlePlaceId String?
+  googleAccountName String?
+  googleLocationName String?
+  googleLocationId String?
+  reviews       Review[]
+  feedback      GuestFeedback[]
+  qrCodes       QRCode[]
+  tickets       ComplaintTicket[]
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@unique([businessId, slug])
+}
+
+model PlatformConnection {
+  id              String    @id @default(cuid())
+  businessId      String
+  business        Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  platform        Platform
+  status          ConnectionStatus @default(DISCONNECTED)
+  accountName     String?
+  externalAccountId String?
+  googleAccountName String?
+  googleAccountId String?
+  googleLocationName String?
+  googleLocationId String?
+  accessToken     String?
+  refreshToken    String?
+  tokenType       String?
+  scope           String?
+  expiresAt       DateTime?
+  isActive        Boolean   @default(false)
+  credentialsJson Json?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@unique([businessId, platform])
+}
+
+model Review {
+  id               String          @id @default(cuid())
+  businessId       String
+  locationId       String?
+  business         Business        @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  location         Location?       @relation(fields: [locationId], references: [id])
+  platform         Platform
+  reviewerName     String?
+  rating           Int?
+  reviewText       String
+  language         String?
+  sentiment        String?
+  issueCategory    String?
+  status           ReviewStatus    @default(NEW)
+  source           String          @default("manual")
+  externalReviewId String?
+  replies          ReviewReply[]
+  screenshots      UploadedScreenshot[]
+  complaintTickets ComplaintTicket[]
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  @@index([businessId, platform, status])
+  @@unique([businessId, platform, externalReviewId])
+}
+
+model ReviewReply {
+  id               String       @id @default(cuid())
+  reviewId         String
+  review           Review       @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  aiGeneratedReply String
+  finalReply       String?
+  language         String       @default("English")
+  tone             String       @default("Professional")
+  postedById       String?
+  postedBy         User?        @relation("PostedReplies", fields: [postedById], references: [id])
+  postedAt         DateTime?
+  status           ReviewStatus @default(PENDING_REPLY)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+}
+
+model GuestFeedback {
+  id                String    @id @default(cuid())
+  businessId        String
+  locationId        String?
+  business          Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  location          Location? @relation(fields: [locationId], references: [id])
+  guestName         String
+  mobile            String?
+  rating            Int
+  visitType         String
+  feedbackText      String
+  aiSuggestionsJson Json
+  copiedReview      String?
+  platformClicked   Platform?
+  complaintTicket   ComplaintTicket?
+  createdAt         DateTime  @default(now())
+}
+
+model QRCode {
+  id             String    @id @default(cuid())
+  businessId     String
+  locationId     String?
+  business       Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  location       Location? @relation(fields: [locationId], references: [id])
+  qrType         String
+  label          String
+  destinationUrl String
+  scanCount      Int       @default(0)
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model ComplaintTicket {
+  id              String          @id @default(cuid())
+  businessId      String
+  locationId      String?
+  reviewId        String?
+  guestFeedbackId String?         @unique
+  business        Business        @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  location        Location?       @relation(fields: [locationId], references: [id])
+  review          Review?         @relation(fields: [reviewId], references: [id])
+  guestFeedback   GuestFeedback?  @relation(fields: [guestFeedbackId], references: [id])
+  guestName       String?
+  mobile          String?
+  platform        Platform?
+  rating          Int?
+  issueCategory   String?
+  reviewText      String
+  assignedStaff   String?
+  priority        String          @default("Medium")
+  status          ComplaintStatus @default(OPEN)
+  slaDueAt        DateTime?
+  resolutionNote  String?
+  internalNotes   String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+model Subscription {
+  id             String           @id @default(cuid())
+  businessId     String           @unique
+  business       Business         @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  plan           SubscriptionPlan @default(STARTER)
+  paymentStatus  PaymentStatus    @default(TRIAL)
+  qrLimit        Int              @default(10)
+  aiUsageLimit   Int              @default(1000)
+  reviewLimit    Int              @default(500)
+  startsAt       DateTime         @default(now())
+  renewsAt       DateTime?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  businessId String?
+  userId     String?
+  business   Business? @relation(fields: [businessId], references: [id])
+  user       User?    @relation(fields: [userId], references: [id])
+  action     String
+  entity     String
+  entityId   String?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+}
+
+model AIUsageLog {
+  id               String   @id @default(cuid())
+  businessId       String?
+  userId           String?
+  business         Business? @relation(fields: [businessId], references: [id])
+  user             User?    @relation(fields: [userId], references: [id])
+  feature          String
+  promptTokens     Int      @default(0)
+  completionTokens Int      @default(0)
+  costEstimate     Decimal  @default(0)
+  createdAt        DateTime @default(now())
+}
+
+model UploadedScreenshot {
+  id              String   @id @default(cuid())
+  businessId      String
+  reviewId        String?
+  business        Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  review          Review?  @relation(fields: [reviewId], references: [id])
+  fileName        String
+  filePath        String
+  mimeType        String
+  ocrText         String?
+  createdAt       DateTime @default(now())
+}
+
+model BusinessSettings {
+  id                    String   @id @default(cuid())
+  businessId            String   @unique
+  business              Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  brandTone             String   @default("Warm, professional and hospitality-focused")
+  autoGenerateReplies   Boolean  @default(true)
+  allowApprovalWorkflow Boolean  @default(true)
+  alertEmail            String?
+  alertWhatsApp         String?
+  customPlatformLinks   Json?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+model SEOKeyword {
+  id         String   @id @default(cuid())
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  keyword    String
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+}
+
+model Notification {
+  id         String   @id @default(cuid())
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  channel    String
+  subject    String
+  message    String
+  status     String   @default("queued")
+  createdAt  DateTime @default(now())
+}
