@@ -1,30 +1,17 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { withAuth } from "next-auth/middleware";
 
-export function middleware(request: NextRequest) {
-  const user = decodeMiddlewareToken(request.cookies.get("reviewboost_token")?.value);
-  const path = request.nextUrl.pathname;
-  if ((path.startsWith("/admin") || path.startsWith("/super-admin")) && !user) {
-    return NextResponse.redirect(new URL("/login", request.url));
+export default withAuth({
+  pages: { signIn: "/login" },
+  callbacks: {
+    authorized({ token, req }) {
+      const path = req.nextUrl.pathname;
+      if (!token) return false;
+      if (path.startsWith("/super-admin")) return token.role === "SUPER_ADMIN";
+      return true;
+    }
   }
-  if (path.startsWith("/super-admin") && user?.role !== "SUPER_ADMIN") {
-    return NextResponse.redirect(new URL("/admin", request.url));
-  }
-  return NextResponse.next();
-}
+});
 
 export const config = {
-  matcher: ["/admin/:path*", "/super-admin/:path*"]
+  matcher: ["/admin/:path*", "/super-admin/:path*", "/api/qr/:path*", "/api/reviews/:path*", "/api/manual-reviews/:path*", "/api/export/:path*", "/api/super-admin/:path*"]
 };
-
-function decodeMiddlewareToken(token?: string) {
-  if (!token) return null;
-  const [, payload] = token.split(".");
-  if (!payload) return null;
-  try {
-    const normalized = payload.replace(/-/g, "+").replace(/_/g, "/");
-    const json = atob(normalized);
-    return JSON.parse(json) as { role?: string; exp?: number };
-  } catch {
-    return null;
-  }
-}

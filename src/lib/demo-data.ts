@@ -1,4 +1,3 @@
-import { Role } from "@prisma/client";
 import type { GuestSuggestions } from "@/lib/ai";
 
 export const demoBusiness = {
@@ -23,11 +22,6 @@ export const demoBusiness = {
   ],
   locations: [{ id: "demo-location", name: "Hazratganj Branch", slug: "hazratganj", city: "Lucknow", address: "Hazratganj, Lucknow" }]
 };
-
-export const demoUsers = [
-  { id: "demo-super", name: "Super Admin", email: "super@reviewboost.ai", role: Role.SUPER_ADMIN, businessId: null },
-  { id: "demo-admin", name: "Business Admin", email: "admin@reviewboost.ai", role: Role.BUSINESS_ADMIN, businessId: demoBusiness.id }
-];
 
 export const demoReviews = [
   {
@@ -77,7 +71,7 @@ export const demoQrCodes = [
 ];
 
 export function isDemoMode() {
-  return !process.env.DATABASE_URL;
+  return false;
 }
 
 export function demoGuestSuggestions(feedbackText: string): GuestSuggestions {

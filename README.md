@@ -48,12 +48,12 @@ npm install
 cp .env.example .env
 ```
 
-3. Create a MySQL database and set `DATABASE_URL`.
+3. Create a PostgreSQL database and set `DATABASE_URL`.
 
 Example:
 
 ```env
-DATABASE_URL="mysql://reviewboost_user:reviewboost_password@localhost:3306/reviewboost_ai"
+DATABASE_URL="postgresql://postgres:password@db.example.supabase.co:5432/postgres?schema=public"
 NEXTAUTH_SECRET="use-a-long-random-secret"
 NEXTAUTH_URL="http://localhost:3000"
 OPENAI_API_KEY="..."
@@ -70,7 +70,7 @@ npm run prisma:generate
 npx prisma migrate dev --name init
 ```
 
-5. Seed demo data:
+5. Seed the initial super admin:
 
 ```bash
 npx prisma db seed
@@ -118,16 +118,21 @@ npm run vercel-build
 
 `vercel-build` runs `prisma generate` before `next build`, which is required for Prisma on Vercel.
 
-For production, use a hosted MySQL-compatible database such as PlanetScale, Aiven, Railway, Neon MySQL-compatible offerings, or any managed MySQL provider. After setting `DATABASE_URL`, apply the schema from your machine or a trusted CI job:
+For production, use PostgreSQL. Supabase is the recommended quick setup:
+
+1. Create a Supabase project.
+2. Copy the PostgreSQL connection string from Supabase.
+3. Add the environment variables locally and in Vercel.
+4. Run:
 
 ```bash
-npm run prisma:push
+npx prisma migrate deploy
 ```
 
-If you later add Prisma migrations, use:
+5. Run:
 
 ```bash
-npm run prisma:migrate:deploy
+npx prisma db seed
 ```
 
 ### Vercel environment variables
@@ -135,7 +140,7 @@ npm run prisma:migrate:deploy
 Use production URLs in Vercel:
 
 ```env
-DATABASE_URL="mysql://USER:PASSWORD@HOST:3306/DATABASE"
+DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/postgres?schema=public"
 NEXTAUTH_SECRET="use-a-long-random-secret"
 NEXTAUTH_URL="https://your-vercel-domain.vercel.app"
 JWT_SECRET="use-a-different-long-random-secret"
@@ -151,11 +156,15 @@ SMTP_PASS=""
 
 When Google login/review sync is enabled, add the same production callback URL to the Google Cloud OAuth client.
 
-## Demo logins
+## Initial super admin
 
-- Super Admin: `super@reviewboost.ai`
-- Business Admin: `admin@reviewboost.ai`
-- Password: `password123`
+The seed script creates the first super admin account:
+
+- Email: `superadmin@yashinfosystems.com`
+- Temporary password: `Admin@123`
+- Role: `SUPER_ADMIN`
+
+Set a strong password after first login from the change-password page.
 
 ## Important environment variables
 
