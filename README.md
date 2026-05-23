@@ -56,6 +56,7 @@ Example:
 DATABASE_URL="postgresql://postgres:password@db.example.supabase.co:5432/postgres?schema=public"
 NEXTAUTH_SECRET="use-a-long-random-secret"
 NEXTAUTH_URL="http://localhost:3000"
+# AUTH_SECRET and AUTH_URL are also supported aliases.
 OPENAI_API_KEY="..."
 GOOGLE_CLIENT_ID="..."
 GOOGLE_CLIENT_SECRET="..."
@@ -143,6 +144,7 @@ Use production URLs in Vercel:
 DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/postgres?schema=public"
 NEXTAUTH_SECRET="use-a-long-random-secret"
 NEXTAUTH_URL="https://your-vercel-domain.vercel.app"
+# Or use AUTH_SECRET and AUTH_URL with the same values.
 JWT_SECRET="use-a-different-long-random-secret"
 NEXT_PUBLIC_APP_URL="https://your-vercel-domain.vercel.app"
 OPENAI_API_KEY=""
@@ -172,6 +174,7 @@ Set a strong password after first login from the change-password page.
 DATABASE_URL=
 NEXTAUTH_SECRET=
 NEXTAUTH_URL=
+# AUTH_SECRET= and AUTH_URL= are also supported.
 OPENAI_API_KEY=
 GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=

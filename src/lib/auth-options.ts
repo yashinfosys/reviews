@@ -3,11 +3,11 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import type { Role } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { hasDatabaseUrl } from "@/lib/env";
+import { authSecret, hasDatabaseUrl } from "@/lib/env";
 
 export const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: authSecret,
   providers: [
     CredentialsProvider({
       name: "Email and password",

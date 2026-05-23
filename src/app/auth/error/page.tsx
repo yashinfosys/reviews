@@ -2,7 +2,7 @@ import Link from "next/link";
 
 const messages: Record<string, string> = {
   DatabaseMissing: "Database connection missing. Please configure DATABASE_URL.",
-  Configuration: "Authentication is not configured. Please check NEXTAUTH_SECRET and NEXTAUTH_URL.",
+  Configuration: "Authentication is not configured. Please check NEXTAUTH_SECRET or AUTH_SECRET, and NEXTAUTH_URL or AUTH_URL.",
   AccessDenied: "You do not have access to this area.",
   CredentialsSignin: "Invalid email or password."
 };

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { authSecret, authUrl } from "@/lib/env";
 
 export const dynamic = "force-dynamic";
 
@@ -19,7 +20,8 @@ export async function GET() {
     database,
     env: {
       hasDatabaseUrl: Boolean(process.env.DATABASE_URL),
-      hasNextAuthSecret: Boolean(process.env.NEXTAUTH_SECRET)
+      hasNextAuthSecret: Boolean(authSecret),
+      hasNextAuthUrl: Boolean(authUrl)
     }
   });
 }

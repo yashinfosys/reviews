@@ -1,7 +1,7 @@
 import crypto from "crypto";
 
 function getKey() {
-  const secret = process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET || "development-secret-change-me";
+  const secret = process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET || process.env.JWT_SECRET || "development-secret-change-me";
   return crypto.createHash("sha256").update(secret).digest();
 }
 

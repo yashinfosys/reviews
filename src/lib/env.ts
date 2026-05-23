@@ -1,8 +1,12 @@
-const requiredEnv = ["DATABASE_URL", "NEXTAUTH_SECRET", "NEXTAUTH_URL"] as const;
-const requiredAuthEnv = ["NEXTAUTH_SECRET", "NEXTAUTH_URL"] as const;
+export const authSecret = process.env.NEXTAUTH_SECRET || process.env.AUTH_SECRET;
+export const authUrl = process.env.NEXTAUTH_URL || process.env.AUTH_URL;
 
 export function validateEnv() {
-  const missing = requiredEnv.filter((key) => !process.env[key]);
+  const missing = [
+    ...(!process.env.DATABASE_URL ? ["DATABASE_URL"] : []),
+    ...(!authSecret ? ["NEXTAUTH_SECRET or AUTH_SECRET"] : []),
+    ...(!authUrl ? ["NEXTAUTH_URL or AUTH_URL"] : [])
+  ];
   if (missing.length) {
     console.error(`Missing required environment variables: ${missing.join(", ")}`);
     return { ok: false, missing };
@@ -11,14 +15,17 @@ export function validateEnv() {
 }
 
 export function validateAuthEnv() {
-  const missing = requiredAuthEnv.filter((key) => !process.env[key]);
+  const missing = [
+    ...(!authSecret ? ["NEXTAUTH_SECRET or AUTH_SECRET"] : []),
+    ...(!authUrl ? ["NEXTAUTH_URL or AUTH_URL"] : [])
+  ];
   if (missing.length) {
     console.error(`Missing required NextAuth environment variables: ${missing.join(", ")}`);
     return { ok: false, missing };
   }
-  if (process.env.NODE_ENV === "production" && process.env.NEXTAUTH_URL?.includes("localhost")) {
-    console.error("NEXTAUTH_URL must use the production Vercel URL in production.");
-    return { ok: false, missing: ["NEXTAUTH_URL"] as string[] };
+  if (process.env.NODE_ENV === "production" && authUrl?.includes("localhost")) {
+    console.error("NEXTAUTH_URL or AUTH_URL must use the production Vercel URL in production.");
+    return { ok: false, missing: ["NEXTAUTH_URL or AUTH_URL"] as string[] };
   }
   return { ok: true, missing: [] as string[] };
 }
