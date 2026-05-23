@@ -12,14 +12,14 @@ function authConfigError(request: Request) {
 }
 
 export async function GET(request: Request) {
+  if (new URL(request.url).pathname.endsWith("/error")) return authConfigError(request);
   const env = validateAuthEnv();
-  if (!env.ok || !hasDatabaseUrl()) return authConfigError(request);
+  if (!env.ok) return authConfigError(request);
   return handler(request as never);
 }
 
 export async function POST(request: Request) {
   const env = validateAuthEnv();
   if (!env.ok) return NextResponse.json({ error: "Authentication is not configured." }, { status: 500 });
-  if (!hasDatabaseUrl()) return NextResponse.json({ error: "Database connection missing. Please configure DATABASE_URL." }, { status: 503 });
   return handler(request as never);
 }

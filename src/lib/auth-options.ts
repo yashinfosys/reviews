@@ -1,13 +1,11 @@
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
+import bcrypt from "bcryptjs";
 import type { Role } from "@prisma/client";
-import { authenticate } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { hasDatabaseUrl } from "@/lib/env";
 
 export const authOptions: NextAuthOptions = {
-  ...(hasDatabaseUrl() ? { adapter: PrismaAdapter(prisma) } : {}),
   session: { strategy: "jwt" },
   secret: process.env.NEXTAUTH_SECRET,
   providers: [
@@ -18,17 +16,27 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        if (!hasDatabaseUrl()) throw new Error("DATABASE_MISSING");
-        if (!credentials?.email || !credentials.password) return null;
-        const user = await authenticate(credentials.email, credentials.password);
-        if (!user) return null;
-        return {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          role: user.role,
-          businessId: user.businessId || null
-        } as never;
+        try {
+          if (!hasDatabaseUrl()) {
+            console.error("AUTH_AUTHORIZE_ERROR", "DATABASE_URL is missing");
+            return null;
+          }
+          if (!credentials?.email || !credentials.password) return null;
+          const user = await prisma.user.findUnique({ where: { email: credentials.email } });
+          if (!user) return null;
+          const isValid = await bcrypt.compare(credentials.password, user.passwordHash);
+          if (!isValid) return null;
+          return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            businessId: user.businessId || null
+          } as never;
+        } catch (error) {
+          console.error("AUTH_AUTHORIZE_ERROR", error);
+          return null;
+        }
       }
     })
   ],
@@ -42,9 +50,9 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       if (session.user) {
-        (session.user as never as { id?: string; role?: string; businessId?: string | null }).id = token.sub as string;
-        (session.user as never as { role?: string; businessId?: string | null }).role = token.role as string;
-        (session.user as never as { businessId?: string | null }).businessId = token.businessId as string | null;
+        (session.user as never as { id?: string; role?: string; businessId?: string | null }).id = typeof token.sub === "string" ? token.sub : "";
+        (session.user as never as { role?: string; businessId?: string | null }).role = typeof token.role === "string" ? token.role : undefined;
+        (session.user as never as { businessId?: string | null }).businessId = typeof token.businessId === "string" ? token.businessId : null;
       }
       return session;
     }
