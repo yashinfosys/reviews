@@ -263,6 +263,11 @@ model GuestFeedback {
   rating            Int
   visitType         String
   feedbackText      String
+  rawComment        String?
+  voiceTranscript   String?
+  improvedFeedbackText String?
+  improvedFeedbackLanguage String?
+  aiCorrectionUsed  Boolean   @default(false)
   selectedKeywords  Json?
   aiSuggestionsJson Json
   generatedReview   Json?

@@ -18,9 +18,14 @@ export async function POST(request: Request) {
   const visitType = String(form.get("visitType") || "Other");
   const rating = Number(form.get("rating") || 5);
   const feedbackText = String(form.get("feedbackText") || "");
+  const rawComment = String(form.get("rawComment") || "");
+  const voiceTranscript = String(form.get("voiceTranscript") || "");
+  const improvedFeedbackText = String(form.get("improvedFeedbackText") || "");
+  const improvedFeedbackLanguage = String(form.get("improvedFeedbackLanguage") || "");
+  const aiCorrectionUsed = String(form.get("aiCorrectionUsed") || "") === "true";
   const keywords = JSON.parse(String(form.get("keywords") || "[]")) as string[];
   const selectedKeywords = JSON.parse(String(form.get("selectedKeywords") || "[]")) as string[];
-  const realFeedbackText = feedbackText || selectedKeywords.join(", ") || visitType;
+  const realFeedbackText = improvedFeedbackText || feedbackText || selectedKeywords.join(", ") || visitType;
 
   if (isDemoMode()) {
     const suggestions = demoGuestSuggestions(realFeedbackText);
@@ -56,6 +61,11 @@ export async function POST(request: Request) {
       visitType,
       rating,
       feedbackText: realFeedbackText,
+      rawComment: rawComment || feedbackText || undefined,
+      voiceTranscript: voiceTranscript || undefined,
+      improvedFeedbackText: improvedFeedbackText || undefined,
+      improvedFeedbackLanguage: improvedFeedbackLanguage || undefined,
+      aiCorrectionUsed,
       selectedKeywords,
       aiSuggestionsJson: suggestions,
       generatedReview: suggestions

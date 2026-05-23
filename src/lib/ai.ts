@@ -21,6 +21,12 @@ export type GuestSuggestions = {
   hinglish: string;
 };
 
+export type ImprovedFeedback = {
+  cleanHinglish: string;
+  professionalEnglish: string;
+  simpleHindi: string;
+};
+
 export async function generateGuestReviewSuggestions(input: GuestSuggestionInput): Promise<GuestSuggestions> {
   const fallback = buildGuestSuggestionFallback(input);
   if (!openai) return fallback;
@@ -54,6 +60,52 @@ Return JSON with keys shortEnglish, detailedSeoEnglish, hindi, hinglish.`;
       ]
     });
     return JSON.parse(response.choices[0]?.message.content || "{}") as GuestSuggestions;
+  } catch {
+    return fallback;
+  }
+}
+
+type ImproveFeedbackInput = {
+  feedbackText: string;
+  language: string;
+  selectedKeywords: string[];
+  rating: number;
+  businessName: string;
+  businessCategory: string;
+};
+
+export async function improveGuestFeedback(input: ImproveFeedbackInput): Promise<ImprovedFeedback> {
+  const fallback = buildImproveFeedbackFallback(input.feedbackText);
+  if (!openai) return fallback;
+
+  const prompt = `Improve this guest feedback without changing the meaning or adding any new details.
+Feedback: ${input.feedbackText}
+Language selected by guest: ${input.language}
+Rating: ${input.rating}
+Selected keywords: ${input.selectedKeywords.join(", ")}
+Business: ${input.businessName}
+Category: ${input.businessCategory}
+
+Rules:
+- Only correct grammar and clarity.
+- Keep the guest's real experience unchanged.
+- Do not add fake details or force positivity.
+- If feedback is negative, keep it honest but polite.
+- Respect the rating and selected keywords.
+
+Return JSON with keys cleanHinglish, professionalEnglish, simpleHindi.`;
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      temperature: 0.3,
+      response_format: { type: "json_object" },
+      messages: [
+        { role: "system", content: complianceSystemPrompt() },
+        { role: "user", content: prompt }
+      ]
+    });
+    return { ...fallback, ...JSON.parse(response.choices[0]?.message.content || "{}") } as ImprovedFeedback;
   } catch {
     return fallback;
   }
@@ -117,6 +169,15 @@ function buildGuestSuggestionFallback(input: GuestSuggestionInput): GuestSuggest
     detailedSeoEnglish: `${base}${keyword ? ` It is a good option for guests looking for${keyword}.` : ""}`,
     hindi: `${input.businessName} mein hamara anubhav achha raha. ${selected} pasand aaya.${comment}`,
     hinglish: `${input.businessName} ka experience kaafi accha raha. ${selected} really achha laga.${comment}`
+  };
+}
+
+function buildImproveFeedbackFallback(feedbackText: string): ImprovedFeedback {
+  const cleaned = feedbackText.trim().replace(/\s+/g, " ");
+  return {
+    cleanHinglish: cleaned,
+    professionalEnglish: cleaned,
+    simpleHindi: cleaned
   };
 }
 
