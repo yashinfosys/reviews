@@ -82,6 +82,75 @@ npx prisma db seed
 npm run dev
 ```
 
+## GitHub
+
+This folder is ready to push to GitHub:
+
+```bash
+git init
+git add .
+git commit -m "Initial ReviewBoost AI app"
+git branch -M main
+git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO.git
+git push -u origin main
+```
+
+The repository includes:
+
+- `.gitignore` for Node, Next.js, Vercel, logs and local environment files
+- GitHub Actions CI at `.github/workflows/ci.yml`
+- `npm ci`, Prisma client generation and `npm run build` validation on pushes and pull requests
+
+## Vercel deployment
+
+1. Push the project to GitHub.
+2. In Vercel, click **Add New > Project** and import the GitHub repository.
+3. Keep the framework preset as **Next.js**.
+4. Add the required environment variables in **Project Settings > Environment Variables**.
+5. Deploy.
+
+The included `vercel.json` uses:
+
+```bash
+npm ci
+npm run vercel-build
+```
+
+`vercel-build` runs `prisma generate` before `next build`, which is required for Prisma on Vercel.
+
+For production, use a hosted MySQL-compatible database such as PlanetScale, Aiven, Railway, Neon MySQL-compatible offerings, or any managed MySQL provider. After setting `DATABASE_URL`, apply the schema from your machine or a trusted CI job:
+
+```bash
+npm run prisma:push
+```
+
+If you later add Prisma migrations, use:
+
+```bash
+npm run prisma:migrate:deploy
+```
+
+### Vercel environment variables
+
+Use production URLs in Vercel:
+
+```env
+DATABASE_URL="mysql://USER:PASSWORD@HOST:3306/DATABASE"
+NEXTAUTH_SECRET="use-a-long-random-secret"
+NEXTAUTH_URL="https://your-vercel-domain.vercel.app"
+JWT_SECRET="use-a-different-long-random-secret"
+NEXT_PUBLIC_APP_URL="https://your-vercel-domain.vercel.app"
+OPENAI_API_KEY=""
+GOOGLE_CLIENT_ID=""
+GOOGLE_CLIENT_SECRET=""
+GOOGLE_REDIRECT_URI="https://your-vercel-domain.vercel.app/api/google/callback"
+SMTP_HOST=""
+SMTP_USER=""
+SMTP_PASS=""
+```
+
+When Google login/review sync is enabled, add the same production callback URL to the Google Cloud OAuth client.
+
 ## Demo logins
 
 - Super Admin: `super@reviewboost.ai`
