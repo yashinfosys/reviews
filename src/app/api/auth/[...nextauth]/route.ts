@@ -47,9 +47,15 @@ const handler = NextAuth({
             where: {
               email,
             },
+            include: {
+              business: { select: { status: true, deletedAt: true } }
+            }
           });
 
           if (!user || !user.isActive) return null;
+          if (user.role !== Role.SUPER_ADMIN && (!user.business || user.business.status !== "ACTIVE" || user.business.deletedAt)) {
+            return null;
+          }
 
           const isValid = await bcrypt.compare(
             credentials.password,

@@ -41,8 +41,14 @@ export const authOptions: NextAuthOptions = {
           const email = credentials.email.toLowerCase().trim();
           const user = await prisma.user.findUnique({
             where: { email },
+            include: {
+              business: { select: { status: true, deletedAt: true } }
+            }
           });
           if (!user || !user.isActive) return null;
+          if (user.role !== Role.SUPER_ADMIN && (!user.business || user.business.status !== "ACTIVE" || user.business.deletedAt)) {
+            return null;
+          }
           const isValid = await bcrypt.compare(credentials.password, user.password);
           if (!isValid) return null;
           return {

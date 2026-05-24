@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BarChart3, Building2, ClipboardList, Globe2, Home, Inbox, QrCode, Settings, ShieldCheck, Ticket } from "lucide-react";
+import { BarChart3, Building2, ClipboardList, CreditCard, Globe2, Home, Inbox, PlusCircle, QrCode, Settings, ShieldCheck, Ticket, Users } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import { SessionUserMenu } from "@/components/session-user-menu";
 
@@ -17,8 +17,15 @@ const adminLinks = [
 
 const superLinks = [
   { href: "/super-admin", label: "Overview", icon: ShieldCheck },
-  { href: "/super-admin/businesses", label: "Businesses", icon: Building2 },
-  { href: "/super-admin/usage", label: "Usage", icon: BarChart3 }
+  { href: "/super-admin/businesses", label: "Properties / Businesses", icon: Building2 },
+  { href: "/super-admin/businesses/new", label: "Add Property", icon: PlusCircle },
+  { href: "/super-admin/admin-users", label: "Admin Users", icon: Users },
+  { href: "/super-admin/subscriptions", label: "Subscriptions", icon: CreditCard },
+  { href: "/super-admin/qr-analytics", label: "QR Analytics", icon: QrCode },
+  { href: "/super-admin/reviews-analytics", label: "Reviews Analytics", icon: BarChart3 },
+  { href: "/super-admin/complaints", label: "Complaints", icon: Ticket },
+  { href: "/super-admin/payments", label: "Payments", icon: CreditCard },
+  { href: "/super-admin/settings", label: "Settings", icon: Settings }
 ];
 
 export async function DashboardShell({ children, superAdmin = false }: { children: React.ReactNode; superAdmin?: boolean }) {

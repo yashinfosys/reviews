@@ -73,10 +73,12 @@ model User {
   email         String       @unique
   emailVerified DateTime?
   image         String?
+  mobile        String?
   password      String
   role          Role         @default(STAFF)
   businessId    String?
   isActive      Boolean      @default(true)
+  mustChangePassword Boolean @default(false)
   business      Business?    @relation(fields: [businessId], references: [id])
   accounts      Account[]
   sessions      Session[]
@@ -126,14 +128,21 @@ model Business {
   name                String
   slug                String               @unique
   category            String
+  industryType        String               @default("Other")
   status              BusinessStatus       @default(ACTIVE)
   logoUrl             String?
   brandColor          String               @default("#0f766e")
+  ownerName           String?
+  ownerEmail          String?
+  ownerMobile         String?
   address             String
   city                String
+  state               String?
+  country             String               @default("India")
   phone               String?
   whatsapp            String?
   website             String?
+  websiteUrl          String?
   welcomeMessage      String               @default("Thank you for visiting. Your honest feedback helps us improve.")
   googleReviewLink    String?
   tripadvisorLink     String?
@@ -158,6 +167,7 @@ model Business {
   aiUsageLogs         AIUsageLog[]
   uploadedScreenshots UploadedScreenshot[]
   auditLogs           AuditLog[]
+  deletedAt           DateTime?
   createdAt           DateTime             @default(now())
   updatedAt           DateTime             @updatedAt
 }
@@ -341,11 +351,14 @@ model Subscription {
   business       Business         @relation(fields: [businessId], references: [id], onDelete: Cascade)
   plan           SubscriptionPlan @default(STARTER)
   paymentStatus  PaymentStatus    @default(TRIAL)
+  status         String           @default("ACTIVE")
   qrLimit        Int              @default(10)
   customQrLimit  Int?
   isCustomLimitEnabled Boolean    @default(false)
   aiUsageLimit   Int              @default(1000)
   reviewLimit    Int              @default(500)
+  validFrom      DateTime?
+  validTill      DateTime?
   startsAt       DateTime         @default(now())
   renewsAt       DateTime?
   createdAt      DateTime         @default(now())

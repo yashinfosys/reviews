@@ -40,6 +40,16 @@ export async function GuestReviewPage({ params }: { params: { businessSlug: stri
     include: { locations: true, seoKeywords: true }
   });
   if (!business) notFound();
+  if (business.status !== "ACTIVE" || business.deletedAt) {
+    return (
+      <main className="grid min-h-screen place-items-center bg-slate-100 px-4 py-8">
+        <div className="mx-auto max-w-md rounded-lg border bg-white p-6 text-center shadow-soft">
+          <h1 className="text-2xl font-bold text-slate-950">{business.name}</h1>
+          <p className="mt-3 text-sm text-slate-600">This business profile is currently inactive.</p>
+        </div>
+      </main>
+    );
+  }
   const qrCode = params.locationSlug
     ? await prisma.qRCode.findFirst({ where: { id: params.locationSlug, businessId: business.id, isActive: true } })
     : null;

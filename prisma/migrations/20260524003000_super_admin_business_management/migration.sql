@@ -1,0 +1,23 @@
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "mobile" TEXT;
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "mustChangePassword" BOOLEAN NOT NULL DEFAULT false;
+
+ALTER TABLE "Business" ADD COLUMN IF NOT EXISTS "industryType" TEXT NOT NULL DEFAULT 'Other';
+ALTER TABLE "Business" ADD COLUMN IF NOT EXISTS "ownerName" TEXT;
+ALTER TABLE "Business" ADD COLUMN IF NOT EXISTS "ownerEmail" TEXT;
+ALTER TABLE "Business" ADD COLUMN IF NOT EXISTS "ownerMobile" TEXT;
+ALTER TABLE "Business" ADD COLUMN IF NOT EXISTS "state" TEXT;
+ALTER TABLE "Business" ADD COLUMN IF NOT EXISTS "country" TEXT NOT NULL DEFAULT 'India';
+ALTER TABLE "Business" ADD COLUMN IF NOT EXISTS "websiteUrl" TEXT;
+ALTER TABLE "Business" ADD COLUMN IF NOT EXISTS "deletedAt" TIMESTAMP(3);
+
+UPDATE "Business"
+SET "industryType" = COALESCE(NULLIF("category", ''), 'Other')
+WHERE "industryType" = 'Other';
+
+UPDATE "Business"
+SET "websiteUrl" = "website"
+WHERE "websiteUrl" IS NULL AND "website" IS NOT NULL;
+
+ALTER TABLE "Subscription" ADD COLUMN IF NOT EXISTS "status" TEXT NOT NULL DEFAULT 'ACTIVE';
+ALTER TABLE "Subscription" ADD COLUMN IF NOT EXISTS "validFrom" TIMESTAMP(3);
+ALTER TABLE "Subscription" ADD COLUMN IF NOT EXISTS "validTill" TIMESTAMP(3);

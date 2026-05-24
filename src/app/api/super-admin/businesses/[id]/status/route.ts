@@ -11,7 +11,13 @@ export async function POST(request: Request, { params }: { params: { id: string 
   const status = body.status === "DISABLED" ? BusinessStatus.DISABLED : BusinessStatus.ACTIVE;
   if (isDemoMode()) return NextResponse.json({ ok: true, id: params.id, status, demoMode: true });
 
-  const business = await prisma.business.update({ where: { id: params.id }, data: { status } });
+  const business = await prisma.business.update({
+    where: { id: params.id },
+    data: {
+      status,
+      users: { updateMany: { where: { role: Role.BUSINESS_ADMIN }, data: { isActive: status === BusinessStatus.ACTIVE } } }
+    }
+  });
   await writeAuditLog({ businessId: business.id, userId: user.id, action: "BUSINESS_STATUS_UPDATED", entity: "Business", entityId: business.id, metadata: { status } });
   return NextResponse.json({ business });
 }
