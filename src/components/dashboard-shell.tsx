@@ -16,22 +16,19 @@ const adminLinks = [
 ];
 
 const superLinks = [
-  { href: "/super-admin", label: "Overview", icon: ShieldCheck },
+  { href: "/super-admin", label: "Dashboard", icon: ShieldCheck },
   { href: "/super-admin/businesses", label: "Properties", icon: Building2 },
   { href: "/super-admin/businesses/new", label: "Add Property", icon: PlusCircle },
   { href: "/super-admin/admin-users", label: "Admin Users", icon: Users },
-  { href: "/super-admin/packages", label: "Packages", icon: ClipboardList },
-  { href: "/super-admin/subscriptions", label: "Subscriptions", icon: CreditCard },
   { href: "/super-admin/qr-analytics", label: "QR Analytics", icon: QrCode },
-  { href: "/super-admin/review-analytics", label: "Review Analytics", icon: BarChart3 },
+  { href: "/super-admin/review-analytics", label: "Reviews", icon: BarChart3 },
   { href: "/super-admin/complaints", label: "Complaints", icon: Ticket },
   { href: "/super-admin/payments", label: "Payments", icon: CreditCard },
+  { href: "/super-admin/subscriptions", label: "Subscriptions", icon: CreditCard },
   { href: "/super-admin/settings", label: "Settings", icon: Settings }
 ];
 
 export async function DashboardShell({ children, superAdmin = false }: { children: React.ReactNode; superAdmin?: boolean }) {
-  if (superAdmin) return <>{children}</>;
-
   const user = await getCurrentUser();
   const links = superAdmin ? superLinks : adminLinks;
   return (
@@ -40,7 +37,7 @@ export async function DashboardShell({ children, superAdmin = false }: { childre
         <Link href={superAdmin ? "/super-admin" : "/admin"} className="block text-xl font-bold text-primary">ReviewBoost AI</Link>
         {superAdmin ? (
           <div className="mt-2 rounded-md bg-emerald-50 px-3 py-2 text-xs font-bold uppercase tracking-wide text-emerald-800 ring-1 ring-emerald-200">
-            NEW SUPER ADMIN UI
+            NEW SUPER ADMIN PROPERTY MANAGEMENT
           </div>
         ) : null}
         <div className="mt-6 rounded-md bg-teal-50 p-3 text-sm text-teal-900">{user?.name || "Signed in user"}</div>
@@ -57,7 +54,7 @@ export async function DashboardShell({ children, superAdmin = false }: { childre
         <div className="border-b bg-white px-4 py-4 lg:px-8">
           <div className="flex items-center justify-between gap-3">
             <div>
-              {superAdmin ? <div className="text-sm font-bold uppercase tracking-wide text-emerald-700">NEW SUPER ADMIN UI</div> : null}
+              {superAdmin ? <div className="text-sm font-bold uppercase tracking-wide text-emerald-700">NEW SUPER ADMIN PROPERTY MANAGEMENT</div> : null}
               <div className="text-sm text-slate-500">Compliance-safe AI review platform</div>
             </div>
             {user ? <SessionUserMenu name={user.name} role={user.role} /> : null}
