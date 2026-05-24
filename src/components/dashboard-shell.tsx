@@ -30,6 +30,8 @@ const superLinks = [
 ];
 
 export async function DashboardShell({ children, superAdmin = false }: { children: React.ReactNode; superAdmin?: boolean }) {
+  if (superAdmin) return <>{children}</>;
+
   const user = await getCurrentUser();
   const links = superAdmin ? superLinks : adminLinks;
   return (

@@ -40,7 +40,7 @@ export default async function SuperBusinessesPage({ searchParams }: { searchPara
           <h1 className="text-3xl font-bold">Properties</h1>
           <p className="mt-1 text-sm text-slate-500">Manage real business profiles, admins, subscriptions, and access.</p>
         </div>
-        <Link href="/super-admin/businesses/new" className="inline-flex h-12 items-center justify-center rounded-md bg-primary px-5 text-base font-semibold text-white shadow-soft">+ Add New Property</Link>
+        <Link href="/super-admin/businesses/new" className="inline-flex h-12 items-center justify-center rounded-md bg-primary px-5 text-base font-semibold text-white shadow-soft">+ Add Property</Link>
       </div>
 
       <form className="mt-6 grid gap-3 rounded-lg border bg-white p-4 shadow-soft md:grid-cols-5">

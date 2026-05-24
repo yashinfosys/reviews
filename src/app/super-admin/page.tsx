@@ -59,7 +59,7 @@ export default async function SuperAdminPage() {
       <DashboardShell superAdmin>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h1 className="text-3xl font-bold">Super Admin Overview</h1>
+            <h1 className="text-3xl font-bold">NEW SUPER ADMIN PROPERTY MANAGEMENT</h1>
             <p className="mt-1 text-sm text-slate-500">Global property, review, complaint, and QR performance.</p>
             <div className="mt-3 inline-flex rounded-full bg-emerald-50 px-3 py-1 text-sm font-bold text-emerald-800 ring-1 ring-emerald-200">
               NEW SUPER ADMIN UI
@@ -69,7 +69,7 @@ export default async function SuperAdminPage() {
             </div>
           </div>
           <Link href="/super-admin/businesses/new" className="inline-flex h-12 items-center justify-center rounded-md bg-primary px-5 text-base font-semibold text-white shadow-soft hover:bg-teal-800">
-            + Add New Property
+            + Add Property
           </Link>
         </div>
 
