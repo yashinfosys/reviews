@@ -5,6 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { INDUSTRY_TYPES } from "@/lib/super-admin-business";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const fetchCache = "force-no-store";
 
 export default async function SuperBusinessesPage({ searchParams }: { searchParams: { status?: string; plan?: string; industryType?: string; city?: string } }) {
   const where = {

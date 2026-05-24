@@ -23,7 +23,7 @@ const superLinks = [
   { href: "/super-admin/packages", label: "Packages", icon: ClipboardList },
   { href: "/super-admin/subscriptions", label: "Subscriptions", icon: CreditCard },
   { href: "/super-admin/qr-analytics", label: "QR Analytics", icon: QrCode },
-  { href: "/super-admin/reviews-analytics", label: "Reviews Analytics", icon: BarChart3 },
+  { href: "/super-admin/review-analytics", label: "Review Analytics", icon: BarChart3 },
   { href: "/super-admin/complaints", label: "Complaints", icon: Ticket },
   { href: "/super-admin/payments", label: "Payments", icon: CreditCard },
   { href: "/super-admin/settings", label: "Settings", icon: Settings }
@@ -36,6 +36,7 @@ export async function DashboardShell({ children, superAdmin = false }: { childre
     <div className="min-h-screen bg-slate-100">
       <aside className="fixed hidden h-screen w-64 border-r bg-white p-4 lg:block">
         <Link href={superAdmin ? "/super-admin" : "/admin"} className="block text-xl font-bold text-primary">ReviewBoost AI</Link>
+        {superAdmin ? <div className="mt-1 text-xs font-semibold uppercase tracking-wide text-slate-500">Super Admin Console</div> : null}
         <div className="mt-6 rounded-md bg-teal-50 p-3 text-sm text-teal-900">{user?.name || "Signed in user"}</div>
         <nav className="mt-6 grid gap-1">
           {links.map((item) => (
