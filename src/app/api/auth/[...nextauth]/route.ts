@@ -33,9 +33,11 @@ const handler = NextAuth({
             return null;
           }
 
+          const email = credentials.email.toLowerCase().trim();
+
           const user = await prisma.user.findUnique({
             where: {
-              email: credentials.email,
+              email,
             },
           });
 

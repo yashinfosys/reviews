@@ -5,6 +5,9 @@ const prisma = new PrismaClient();
 
 async function main() {
   const password = await bcrypt.hash("Admin@123", 10);
+  const superAdminEmail = "superadmin@yashinfosystems.com";
+  const businessAdminEmail = "admin@reviewboost.ai";
+
   const business = await prisma.business.upsert({
     where: { slug: "reviewboost-demo-business" },
     update: {},
@@ -31,32 +34,32 @@ async function main() {
   });
 
   await prisma.user.upsert({
-    where: { email: "superadmin@yashinfosystems.com" },
+    where: { email: superAdminEmail },
     update: {
-      name: "Yash Infosystems Super Admin",
+      name: "Super Admin",
       password,
       role: Role.SUPER_ADMIN,
       businessId: null
     },
     create: {
-      name: "Yash Infosystems Super Admin",
-      email: "superadmin@yashinfosystems.com",
+      name: "Super Admin",
+      email: superAdminEmail,
       password,
       role: Role.SUPER_ADMIN
     }
   });
 
   await prisma.user.upsert({
-    where: { email: "admin@reviewboost.ai" },
+    where: { email: businessAdminEmail },
     update: {
-      name: "ReviewBoost Business Admin",
+      name: "Business Admin",
       password,
       role: Role.BUSINESS_ADMIN,
       businessId: business.id
     },
     create: {
-      name: "ReviewBoost Business Admin",
-      email: "admin@reviewboost.ai",
+      name: "Business Admin",
+      email: businessAdminEmail,
       password,
       role: Role.BUSINESS_ADMIN,
       businessId: business.id
