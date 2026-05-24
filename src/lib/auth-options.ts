@@ -1,64 +1,72 @@
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
-import type { Role } from "@prisma/client";
+import { Role } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
-import { authSecret, hasDatabaseUrl } from "@/lib/env";
 
 export const authOptions: NextAuthOptions = {
-  session: { strategy: "jwt" },
-  secret: authSecret,
+  secret:
+    process.env.NEXTAUTH_SECRET ||
+    process.env.AUTH_SECRET ||
+    "temporary-dev-secret",
+
+  session: {
+    strategy: "jwt",
+  },
+
+  pages: {
+    signIn: "/login",
+    error: "/auth/error",
+  },
+
   providers: [
     CredentialsProvider({
-      name: "Email and password",
+      name: "credentials",
       credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
+        email: {},
+        password: {},
       },
+
       async authorize(credentials) {
         try {
-          if (!hasDatabaseUrl()) {
-            console.error("AUTH_AUTHORIZE_ERROR", "DATABASE_URL is missing");
-            return null;
-          }
-          if (!credentials?.email || !credentials.password) return null;
-          const user = await prisma.user.findUnique({ where: { email: credentials.email } });
+          if (!credentials?.email || !credentials?.password) return null;
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email },
+          });
           if (!user) return null;
-          const isValid = await bcrypt.compare(credentials.password, user.passwordHash);
+          const isValid = await bcrypt.compare(credentials.password, user.password);
           if (!isValid) return null;
           return {
             id: user.id,
-            name: user.name,
             email: user.email,
+            name: user.name,
             role: user.role,
-            businessId: user.businessId || null
-          } as never;
+            businessId: user.businessId,
+          };
         } catch (error) {
-          console.error("AUTH_AUTHORIZE_ERROR", error);
+          console.error("AUTH_ERROR", error);
           return null;
         }
-      }
-    })
+      },
+    }),
   ],
+
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.role = (user as never as { role: Role }).role;
-        token.businessId = (user as never as { businessId?: string | null }).businessId;
+        token.role = user.role;
+        token.businessId = user.businessId;
       }
       return token;
     },
+
     async session({ session, token }) {
       if (session.user) {
-        (session.user as never as { id?: string; role?: string; businessId?: string | null }).id = typeof token.sub === "string" ? token.sub : "";
-        (session.user as never as { role?: string; businessId?: string | null }).role = typeof token.role === "string" ? token.role : undefined;
-        (session.user as never as { businessId?: string | null }).businessId = typeof token.businessId === "string" ? token.businessId : null;
+        session.user.id = token.sub || "";
+        session.user.role = token.role || Role.STAFF;
+        session.user.businessId = token.businessId || null;
       }
       return session;
-    }
+    },
   },
-  pages: {
-    signIn: "/login",
-    error: "/auth/error"
-  }
 };

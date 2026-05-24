@@ -14,9 +14,9 @@ export async function POST(request: Request) {
 
   const dbUser = await prisma.user.findUnique({ where: { id: user.id } });
   if (!dbUser) return NextResponse.json({ error: "User not found." }, { status: 404 });
-  const ok = await verifyPassword(currentPassword, dbUser.passwordHash);
+  const ok = await verifyPassword(currentPassword, dbUser.password);
   if (!ok) return NextResponse.json({ error: "Current password is incorrect." }, { status: 400 });
 
-  await prisma.user.update({ where: { id: user.id }, data: { passwordHash: await hashPassword(newPassword) } });
+  await prisma.user.update({ where: { id: user.id }, data: { password: await hashPassword(newPassword) } });
   return NextResponse.json({ ok: true });
 }

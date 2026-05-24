@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 const prisma = new PrismaClient();
 
 async function main() {
-  const passwordHash = await bcrypt.hash("Admin@123", 10);
+  const password = await bcrypt.hash("Admin@123", 10);
   const business = await prisma.business.upsert({
     where: { slug: "reviewboost-demo-business" },
     update: {},
@@ -34,14 +34,14 @@ async function main() {
     where: { email: "superadmin@yashinfosystems.com" },
     update: {
       name: "Yash Infosystems Super Admin",
-      passwordHash,
+      password,
       role: Role.SUPER_ADMIN,
       businessId: null
     },
     create: {
       name: "Yash Infosystems Super Admin",
       email: "superadmin@yashinfosystems.com",
-      passwordHash,
+      password,
       role: Role.SUPER_ADMIN
     }
   });
@@ -50,14 +50,14 @@ async function main() {
     where: { email: "admin@reviewboost.ai" },
     update: {
       name: "ReviewBoost Business Admin",
-      passwordHash,
+      password,
       role: Role.BUSINESS_ADMIN,
       businessId: business.id
     },
     create: {
       name: "ReviewBoost Business Admin",
       email: "admin@reviewboost.ai",
-      passwordHash,
+      password,
       role: Role.BUSINESS_ADMIN,
       businessId: business.id
     }

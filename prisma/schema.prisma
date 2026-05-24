@@ -73,7 +73,7 @@ model User {
   email         String       @unique
   emailVerified DateTime?
   image         String?
-  passwordHash  String
+  password      String
   role          Role         @default(STAFF)
   businessId    String?
   business      Business?    @relation(fields: [businessId], references: [id])

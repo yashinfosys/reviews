@@ -44,7 +44,7 @@ export async function requireUser(_request?: NextRequest, roles?: Role[]) {
 export async function authenticate(email: string, password: string) {
   const user = await prisma.user.findUnique({ where: { email } });
   if (!user) return null;
-  const ok = await verifyPassword(password, user.passwordHash);
+  const ok = await verifyPassword(password, user.password);
   if (!ok) return null;
   return {
     id: user.id,

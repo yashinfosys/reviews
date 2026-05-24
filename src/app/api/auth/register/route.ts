@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     data: {
       name,
       email,
-      passwordHash: await hashPassword(password),
+      password: await hashPassword(password),
       role: Role.BUSINESS_ADMIN,
       businessId: business.id
     }
