@@ -36,7 +36,11 @@ export async function DashboardShell({ children, superAdmin = false }: { childre
     <div className="min-h-screen bg-slate-100">
       <aside className="fixed hidden h-screen w-64 border-r bg-white p-4 lg:block">
         <Link href={superAdmin ? "/super-admin" : "/admin"} className="block text-xl font-bold text-primary">ReviewBoost AI</Link>
-        {superAdmin ? <div className="mt-1 text-xs font-semibold uppercase tracking-wide text-slate-500">Super Admin Console</div> : null}
+        {superAdmin ? (
+          <div className="mt-2 rounded-md bg-emerald-50 px-3 py-2 text-xs font-bold uppercase tracking-wide text-emerald-800 ring-1 ring-emerald-200">
+            NEW SUPER ADMIN UI
+          </div>
+        ) : null}
         <div className="mt-6 rounded-md bg-teal-50 p-3 text-sm text-teal-900">{user?.name || "Signed in user"}</div>
         <nav className="mt-6 grid gap-1">
           {links.map((item) => (
@@ -50,7 +54,10 @@ export async function DashboardShell({ children, superAdmin = false }: { childre
       <main className="lg:pl-64">
         <div className="border-b bg-white px-4 py-4 lg:px-8">
           <div className="flex items-center justify-between gap-3">
-            <div className="text-sm text-slate-500">Compliance-safe AI review platform</div>
+            <div>
+              {superAdmin ? <div className="text-sm font-bold uppercase tracking-wide text-emerald-700">NEW SUPER ADMIN UI</div> : null}
+              <div className="text-sm text-slate-500">Compliance-safe AI review platform</div>
+            </div>
             {user ? <SessionUserMenu name={user.name} role={user.role} /> : null}
           </div>
         </div>

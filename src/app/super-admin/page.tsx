@@ -61,7 +61,10 @@ export default async function SuperAdminPage() {
           <div>
             <h1 className="text-3xl font-bold">Super Admin Overview</h1>
             <p className="mt-1 text-sm text-slate-500">Global property, review, complaint, and QR performance.</p>
-            <div className="mt-3 inline-flex rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-800 ring-1 ring-teal-200">
+            <div className="mt-3 inline-flex rounded-full bg-emerald-50 px-3 py-1 text-sm font-bold text-emerald-800 ring-1 ring-emerald-200">
+              NEW SUPER ADMIN UI
+            </div>
+            <div className="ml-2 mt-3 inline-flex rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-800 ring-1 ring-teal-200">
               Property Management Enabled
             </div>
           </div>
