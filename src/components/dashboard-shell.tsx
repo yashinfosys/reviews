@@ -17,9 +17,10 @@ const adminLinks = [
 
 const superLinks = [
   { href: "/super-admin", label: "Overview", icon: ShieldCheck },
-  { href: "/super-admin/businesses", label: "Properties / Businesses", icon: Building2 },
+  { href: "/super-admin/businesses", label: "Properties", icon: Building2 },
   { href: "/super-admin/businesses/new", label: "Add Property", icon: PlusCircle },
   { href: "/super-admin/admin-users", label: "Admin Users", icon: Users },
+  { href: "/super-admin/packages", label: "Packages", icon: ClipboardList },
   { href: "/super-admin/subscriptions", label: "Subscriptions", icon: CreditCard },
   { href: "/super-admin/qr-analytics", label: "QR Analytics", icon: QrCode },
   { href: "/super-admin/reviews-analytics", label: "Reviews Analytics", icon: BarChart3 },

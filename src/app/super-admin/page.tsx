@@ -59,34 +59,23 @@ export default async function SuperAdminPage() {
             <h1 className="text-3xl font-bold">Super Admin Overview</h1>
             <p className="mt-1 text-sm text-slate-500">Global property, review, complaint, and QR performance.</p>
           </div>
-          <Link href="/super-admin/businesses/new" className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-semibold text-white hover:bg-teal-800">
-            Add Property
+          <Link href="/super-admin/businesses/new" className="inline-flex h-12 items-center justify-center rounded-md bg-primary px-5 text-base font-semibold text-white shadow-soft hover:bg-teal-800">
+            + Add New Property
           </Link>
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-          <MetricCard label="Total Businesses" value={totalBusinesses} />
-          <MetricCard label="Active Businesses" value={activeBusinesses} />
-          <MetricCard label="Disabled Businesses" value={disabledBusinesses} />
-          <MetricCard label="Total QR Scans" value={qrScans._sum.scanCount || 0} />
+          <MetricCard label="Total Properties" value={totalBusinesses} />
+          <MetricCard label="Active Properties" value={activeBusinesses} />
+          <MetricCard label="Disabled Properties" value={disabledBusinesses} />
           <MetricCard label="Total Reviews" value={totalReviews} />
+          <MetricCard label="Total QR Scans" value={qrScans._sum.scanCount || 0} />
           <MetricCard label="Average Rating" value={(avgRating._avg.rating || 0).toFixed(1)} />
-          <MetricCard label="Total Complaints" value={totalComplaints} />
-          <MetricCard label="Pending Complaints" value={pendingComplaints} />
-          <MetricCard label="AI Usage Count" value={aiUsage} />
-          <MetricCard label="Monthly Revenue" value="--" note="Payment integration placeholder" />
+          <MetricCard label="Complaints" value={totalComplaints} note={`${pendingComplaints} pending`} />
+          <MetricCard label="AI Usage" value={aiUsage} />
         </div>
 
-        <div className="mt-8 grid gap-5 xl:grid-cols-2">
-          <div className="xl:col-span-2">
-            <h2 className="text-2xl font-bold text-slate-950">Top 5 Properties</h2>
-            <p className="mt-1 text-sm text-slate-500">Real-time property rankings from database activity.</p>
-          </div>
-          <TopProperties title="Top 5 by QR scans" items={topByScans} />
-          <TopProperties title="Top 5 by total reviews" items={topByReviews} />
-          <TopProperties title="Top 5 by average rating" items={topByRating} />
-          <TopProperties title="Top 5 by complaints" items={topByComplaints} />
-        </div>
+        <TopProperties title="Top Performing Properties" items={topByScans.length ? topByScans : topByReviews.length ? topByReviews : topByRating} />
       </DashboardShell>
     );
   } catch (error) {
@@ -97,8 +86,13 @@ export default async function SuperAdminPage() {
 
 function TopProperties({ title, items }: { title: string; items: Array<{ business: { name: string; city: string; status: string; subscription?: { plan: string } | null }; qrScans: number; averageRating: number; reviews: number; complaints: number; googleClicks: number; otaClicks: number }> }) {
   return (
-    <section className="rounded-lg border bg-white p-5 shadow-soft">
-      <h2 className="text-lg font-semibold text-slate-950">{title}</h2>
+    <section className="mt-8 rounded-lg border bg-white p-5 shadow-soft">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-950">{title}</h2>
+          <p className="mt-1 text-sm text-slate-500">Top 5 properties from real database activity.</p>
+        </div>
+      </div>
       <div className="mt-4 grid gap-3">
         {items.map((item) => (
           <div key={`${title}-${item.business.name}`} className="rounded-md border bg-slate-50 p-3">
@@ -107,16 +101,12 @@ function TopProperties({ title, items }: { title: string; items: Array<{ busines
                 <div className="font-semibold text-slate-950">{item.business.name}</div>
                 <div className="text-sm text-slate-500">{item.business.city || "No city"} / {item.business.subscription?.plan || "STARTER"} / {item.business.status}</div>
               </div>
-              <div className="text-right text-sm text-slate-600">
-                <div>{item.qrScans} scans</div>
-                <div>{item.averageRating.toFixed(1)} avg</div>
+              <div className="grid grid-cols-2 gap-x-5 gap-y-1 text-right text-sm text-slate-600 md:grid-cols-4">
+                <div><strong>{item.averageRating.toFixed(1)}</strong><br />Rating</div>
+                <div><strong>{item.qrScans}</strong><br />QR Scans</div>
+                <div><strong>{item.reviews}</strong><br />Reviews</div>
+                <div><strong>{item.complaints}</strong><br />Complaints</div>
               </div>
-            </div>
-            <div className="mt-3 grid grid-cols-4 gap-2 text-xs text-slate-600">
-              <span>{item.reviews} reviews</span>
-              <span>{item.complaints} complaints</span>
-              <span>{item.googleClicks} Google</span>
-              <span>{item.otaClicks} OTA</span>
             </div>
           </div>
         ))}

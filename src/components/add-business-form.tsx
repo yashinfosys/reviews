@@ -66,17 +66,18 @@ export function AddBusinessForm() {
   return (
     <form onSubmit={submit} className="grid gap-6">
       <section className="rounded-lg border bg-white p-5 shadow-soft">
-        <h2 className="text-lg font-semibold text-slate-950">Business Details</h2>
+        <h2 className="text-lg font-semibold text-slate-950">Property Details</h2>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
-          <Input name="businessName" required placeholder="Business name" value={businessName} onChange={(event) => setBusinessName(event.target.value)} />
+          <Input name="businessName" required placeholder="Hotel / Business Name" value={businessName} onChange={(event) => setBusinessName(event.target.value)} />
           <select name="industryType" className="h-10 rounded-md border bg-white px-3 text-sm" defaultValue="Hotel">
+            <option value="" disabled>Industry Type</option>
             {INDUSTRY_TYPES.map((item) => <option key={item}>{item}</option>)}
           </select>
           <Input name="slug" placeholder="Slug" value={effectiveSlug} onChange={(event) => setSlug(slugify(event.target.value))} />
           <Input name="logoUrl" placeholder="Logo URL optional" />
           <Input name="ownerName" placeholder="Owner name" />
           <Input name="ownerEmail" type="email" placeholder="Owner email" />
-          <Input name="ownerMobile" placeholder="Owner mobile" />
+          <Input name="ownerMobile" placeholder="Mobile" />
           <Input name="whatsapp" placeholder="WhatsApp number" />
           <Input name="address" placeholder="Address" className="md:col-span-2" />
           <Input name="city" placeholder="City" />
@@ -94,25 +95,26 @@ export function AddBusinessForm() {
       <section className="rounded-lg border bg-white p-5 shadow-soft">
         <h2 className="text-lg font-semibold text-slate-950">Admin Details</h2>
         <div className="mt-4 grid gap-4 md:grid-cols-2">
-          <Input name="adminName" required placeholder="Admin name" />
-          <Input name="adminEmail" required type="email" placeholder="Admin email" />
-          <Input name="adminMobile" placeholder="Admin mobile" />
+          <Input name="adminName" required placeholder="Admin Name" />
+          <Input name="adminEmail" required type="email" placeholder="Admin Email" />
+          <Input name="adminMobile" placeholder="Mobile" />
           <Input disabled value="Role: BUSINESS_ADMIN" />
         </div>
       </section>
 
       <section className="rounded-lg border bg-white p-5 shadow-soft">
-        <h2 className="text-lg font-semibold text-slate-950">Subscription</h2>
+        <h2 className="text-lg font-semibold text-slate-950">Package</h2>
         <div className="mt-4 grid gap-4 md:grid-cols-3">
           <select name="plan" className="h-10 rounded-md border bg-white px-3 text-sm" value={plan} onChange={(event) => setPlan(event.target.value as typeof plan)}>
+            <option value="" disabled>Package</option>
             <option value="STARTER">Starter</option>
             <option value="PRO">Pro</option>
             <option value="ENTERPRISE">Enterprise</option>
           </select>
-          <Input name="qrLimit" type="number" min={0} defaultValue={defaults.qrLimit} key={`qr-${plan}`} placeholder="QR limit" />
+          <Input name="qrLimit" type="number" min={0} defaultValue={defaults.qrLimit} key={`qr-${plan}`} placeholder="Max QR Count" />
           <Input name="aiUsageLimit" type="number" min={0} defaultValue={defaults.aiUsageLimit} key={`ai-${plan}`} placeholder="AI usage limit" />
           <Input name="validFrom" type="date" />
-          <Input name="validTill" type="date" />
+          <Input name="validTill" type="date" aria-label="Expiry Date" />
           <select name="paymentStatus" className="h-10 rounded-md border bg-white px-3 text-sm" defaultValue="TRIAL">
             <option value="TRIAL">Trial</option>
             <option value="ACTIVE">Active</option>
