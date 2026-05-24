@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { BusinessStatus, ComplaintStatus } from "@prisma/client";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { MetricCard } from "@/components/metric-card";
@@ -58,6 +59,9 @@ export default async function SuperAdminPage() {
             <h1 className="text-3xl font-bold">Super Admin Overview</h1>
             <p className="mt-1 text-sm text-slate-500">Global property, review, complaint, and QR performance.</p>
           </div>
+          <Link href="/super-admin/businesses/new" className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 text-sm font-semibold text-white hover:bg-teal-800">
+            Add Property
+          </Link>
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
@@ -74,6 +78,10 @@ export default async function SuperAdminPage() {
         </div>
 
         <div className="mt-8 grid gap-5 xl:grid-cols-2">
+          <div className="xl:col-span-2">
+            <h2 className="text-2xl font-bold text-slate-950">Top 5 Properties</h2>
+            <p className="mt-1 text-sm text-slate-500">Real-time property rankings from database activity.</p>
+          </div>
           <TopProperties title="Top 5 by QR scans" items={topByScans} />
           <TopProperties title="Top 5 by total reviews" items={topByReviews} />
           <TopProperties title="Top 5 by average rating" items={topByRating} />
@@ -97,7 +105,7 @@ function TopProperties({ title, items }: { title: string; items: Array<{ busines
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <div className="font-semibold text-slate-950">{item.business.name}</div>
-                <div className="text-sm text-slate-500">{item.business.city || "No city"} · {item.business.subscription?.plan || "STARTER"} · {item.business.status}</div>
+                <div className="text-sm text-slate-500">{item.business.city || "No city"} / {item.business.subscription?.plan || "STARTER"} / {item.business.status}</div>
               </div>
               <div className="text-right text-sm text-slate-600">
                 <div>{item.qrScans} scans</div>

@@ -34,7 +34,7 @@ export async function DashboardShell({ children, superAdmin = false }: { childre
   return (
     <div className="min-h-screen bg-slate-100">
       <aside className="fixed hidden h-screen w-64 border-r bg-white p-4 lg:block">
-        <Link href="/" className="block text-xl font-bold text-primary">ReviewBoost AI</Link>
+        <Link href={superAdmin ? "/super-admin" : "/admin"} className="block text-xl font-bold text-primary">ReviewBoost AI</Link>
         <div className="mt-6 rounded-md bg-teal-50 p-3 text-sm text-teal-900">{user?.name || "Signed in user"}</div>
         <nav className="mt-6 grid gap-1">
           {links.map((item) => (
