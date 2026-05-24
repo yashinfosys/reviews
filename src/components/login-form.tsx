@@ -30,7 +30,13 @@ export function LoginForm({ configError }: { configError?: string }) {
     });
     setLoading(false);
     if (result?.error) {
-      setError(result.error === "DATABASE_MISSING" ? "Database connection missing. Please configure DATABASE_URL." : "Invalid email or password.");
+      setError(
+        result.error === "DATABASE_MISSING"
+          ? "Database connection missing. Please configure DATABASE_URL."
+          : result.error === "DatabaseNotMigrated"
+            ? "Database tables are not migrated. Please run migration."
+            : "Invalid email or password."
+      );
       return;
     }
     router.refresh();

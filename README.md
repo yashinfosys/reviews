@@ -67,15 +67,20 @@ NEXT_PUBLIC_APP_URL="http://localhost:3000"
 4. Generate Prisma client and migrate:
 
 ```bash
-npm run prisma:generate
+npm run db:generate
 npx prisma migrate dev --name init
 ```
 
-5. Seed the initial super admin:
+5. Seed the initial users:
 
 ```bash
-npx prisma db seed
+npm run db:seed
 ```
+
+The seed script upserts:
+
+- `superadmin@yashinfosystems.com` / `Admin@123` / `SUPER_ADMIN`
+- `admin@reviewboost.ai` / `Admin@123` / `BUSINESS_ADMIN`
 
 6. Run locally:
 
@@ -114,10 +119,10 @@ The included `vercel.json` uses:
 
 ```bash
 npm ci
-npm run vercel-build
+npm run build
 ```
 
-`vercel-build` runs `prisma generate` before `next build`, which is required for Prisma on Vercel.
+`build` runs `prisma generate` before `next build`, which is required for Prisma on Vercel.
 
 For production, use PostgreSQL. Supabase is the recommended quick setup:
 
@@ -127,14 +132,31 @@ For production, use PostgreSQL. Supabase is the recommended quick setup:
 4. Run:
 
 ```bash
-npx prisma migrate deploy
+npm run db:migrate
 ```
 
 5. Run:
 
 ```bash
-npx prisma db seed
+npm run db:seed
 ```
+
+If you cannot run a shell against production, set `SETUP_SECRET` in Vercel and call:
+
+```bash
+curl -X POST https://review.yashinfosystem.in/api/setup/seed-admin \
+  -H "x-setup-secret: YOUR_SETUP_SECRET"
+```
+
+The setup endpoint only creates or updates the initial super admin and never returns a password. Run migrations first; if tables are missing it returns: `Database tables are not migrated. Please run migration.`
+
+Check deployment health at:
+
+```text
+https://review.yashinfosystem.in/api/health
+```
+
+It reports whether `DATABASE_URL` exists, Prisma can connect, the `User` table exists, and the user count.
 
 ### Vercel environment variables
 
@@ -145,6 +167,7 @@ DATABASE_URL="postgresql://USER:PASSWORD@HOST:5432/postgres?schema=public"
 NEXTAUTH_SECRET="use-a-long-random-secret"
 NEXTAUTH_URL="https://your-vercel-domain.vercel.app"
 # Or use AUTH_SECRET and AUTH_URL with the same values.
+SETUP_SECRET="use-a-temporary-random-setup-secret"
 JWT_SECRET="use-a-different-long-random-secret"
 NEXT_PUBLIC_APP_URL="https://your-vercel-domain.vercel.app"
 OPENAI_API_KEY=""

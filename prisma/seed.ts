@@ -39,13 +39,15 @@ async function main() {
       name: "Super Admin",
       password,
       role: Role.SUPER_ADMIN,
-      businessId: null
+      businessId: null,
+      isActive: true
     },
     create: {
       name: "Super Admin",
       email: superAdminEmail,
       password,
-      role: Role.SUPER_ADMIN
+      role: Role.SUPER_ADMIN,
+      isActive: true
     }
   });
 
@@ -55,14 +57,16 @@ async function main() {
       name: "Business Admin",
       password,
       role: Role.BUSINESS_ADMIN,
-      businessId: business.id
+      businessId: business.id,
+      isActive: true
     },
     create: {
       name: "Business Admin",
       email: businessAdminEmail,
       password,
       role: Role.BUSINESS_ADMIN,
-      businessId: business.id
+      businessId: business.id,
+      isActive: true
     }
   });
 }

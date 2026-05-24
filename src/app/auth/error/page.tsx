@@ -2,6 +2,7 @@ import Link from "next/link";
 
 const messages: Record<string, string> = {
   DatabaseMissing: "Database connection missing. Please configure DATABASE_URL.",
+  DatabaseNotMigrated: "Database tables are not migrated. Please run migration.",
   Configuration: "Authentication could not be completed. Please try again.",
   AccessDenied: "You do not have access to this area.",
   CredentialsSignin: "Invalid email or password."

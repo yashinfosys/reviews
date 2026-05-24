@@ -1,8 +1,16 @@
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
-import { Role } from "@prisma/client";
+import { Prisma, Role } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+
+function isMigrationError(error: unknown) {
+  if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    return error.code === "P2021" || error.code === "P2022";
+  }
+  const message = error instanceof Error ? error.message : String(error);
+  return message.includes("does not exist") || message.includes("passwordHash") || message.includes("User");
+}
 
 export const authOptions: NextAuthOptions = {
   secret:
@@ -34,7 +42,7 @@ export const authOptions: NextAuthOptions = {
           const user = await prisma.user.findUnique({
             where: { email },
           });
-          if (!user) return null;
+          if (!user || !user.isActive) return null;
           const isValid = await bcrypt.compare(credentials.password, user.password);
           if (!isValid) return null;
           return {
@@ -45,6 +53,10 @@ export const authOptions: NextAuthOptions = {
             businessId: user.businessId,
           };
         } catch (error) {
+          if (isMigrationError(error)) {
+            console.error("AUTH_DATABASE_NOT_MIGRATED", error);
+            throw new Error("DatabaseNotMigrated");
+          }
           console.error("AUTH_ERROR", error);
           return null;
         }
