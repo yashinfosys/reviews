@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BusinessStatus, ComplaintStatus } from "@prisma/client";
+import { BusinessStatus, ComplaintStatus, Role } from "@prisma/client";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { MetricCard } from "@/components/metric-card";
 import { DatabaseUnavailable } from "@/components/database-unavailable";
@@ -12,10 +12,11 @@ export const fetchCache = "force-no-store";
 
 export default async function SuperAdminPage() {
   try {
-    const [totalBusinesses, activeBusinesses, disabledBusinesses, qrScans, totalReviews, avgRating, totalComplaints, pendingComplaints, aiUsage, businesses] = await Promise.all([
+    const [totalBusinesses, activeBusinesses, disabledBusinesses, totalAdminUsers, qrScans, totalReviews, avgRating, totalComplaints, pendingComplaints, aiUsage, businesses] = await Promise.all([
       prisma.business.count({ where: { deletedAt: null } }),
       prisma.business.count({ where: { deletedAt: null, status: BusinessStatus.ACTIVE } }),
       prisma.business.count({ where: { deletedAt: null, status: BusinessStatus.DISABLED } }),
+      prisma.user.count({ where: { role: Role.BUSINESS_ADMIN } }),
       prisma.qRCode.aggregate({ _sum: { scanCount: true } }),
       prisma.review.count(),
       prisma.review.aggregate({ where: { rating: { not: null } }, _avg: { rating: true } }),
@@ -60,6 +61,9 @@ export default async function SuperAdminPage() {
           <div>
             <h1 className="text-3xl font-bold">Super Admin Overview</h1>
             <p className="mt-1 text-sm text-slate-500">Global property, review, complaint, and QR performance.</p>
+            <div className="mt-3 inline-flex rounded-full bg-teal-50 px-3 py-1 text-sm font-semibold text-teal-800 ring-1 ring-teal-200">
+              Property Management Enabled
+            </div>
           </div>
           <Link href="/super-admin/businesses/new" className="inline-flex h-12 items-center justify-center rounded-md bg-primary px-5 text-base font-semibold text-white shadow-soft hover:bg-teal-800">
             + Add New Property
@@ -70,11 +74,14 @@ export default async function SuperAdminPage() {
           <MetricCard label="Total Properties" value={totalBusinesses} />
           <MetricCard label="Active Properties" value={activeBusinesses} />
           <MetricCard label="Disabled Properties" value={disabledBusinesses} />
-          <MetricCard label="Total Reviews" value={totalReviews} />
+          <MetricCard label="Total Admin Users" value={totalAdminUsers} />
           <MetricCard label="Total QR Scans" value={qrScans._sum.scanCount || 0} />
+          <MetricCard label="Total Reviews" value={totalReviews} />
           <MetricCard label="Average Rating" value={(avgRating._avg.rating || 0).toFixed(1)} />
-          <MetricCard label="Complaints" value={totalComplaints} note={`${pendingComplaints} pending`} />
+          <MetricCard label="Total Complaints" value={totalComplaints} />
+          <MetricCard label="Pending Complaints" value={pendingComplaints} />
           <MetricCard label="AI Usage" value={aiUsage} />
+          <MetricCard label="Monthly Revenue" value="--" note="Billing placeholder" />
         </div>
 
         <TopProperties title="Top Performing Properties" items={topByScans.length ? topByScans : topByReviews.length ? topByReviews : topByRating} />
@@ -86,7 +93,7 @@ export default async function SuperAdminPage() {
   }
 }
 
-function TopProperties({ title, items }: { title: string; items: Array<{ business: { name: string; city: string; status: string; subscription?: { plan: string } | null }; qrScans: number; averageRating: number; reviews: number; complaints: number; googleClicks: number; otaClicks: number }> }) {
+function TopProperties({ title, items }: { title: string; items: Array<{ business: { name: string; industryType: string; city: string; status: string; subscription?: { plan: string } | null }; qrScans: number; averageRating: number; reviews: number; complaints: number; googleClicks: number; otaClicks: number }> }) {
   return (
     <section className="mt-8 rounded-lg border bg-white p-5 shadow-soft">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -101,7 +108,7 @@ function TopProperties({ title, items }: { title: string; items: Array<{ busines
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div>
                 <div className="font-semibold text-slate-950">{item.business.name}</div>
-                <div className="text-sm text-slate-500">{item.business.city || "No city"} / {item.business.subscription?.plan || "STARTER"} / {item.business.status}</div>
+                <div className="text-sm text-slate-500">{item.business.industryType || "Other"} / {item.business.city || "No city"} / {item.business.subscription?.plan || "STARTER"} / {item.business.status}</div>
               </div>
               <div className="grid grid-cols-2 gap-x-5 gap-y-1 text-right text-sm text-slate-600 md:grid-cols-4">
                 <div><strong>{item.averageRating.toFixed(1)}</strong><br />Rating</div>
