@@ -8,13 +8,16 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 export const fetchCache = "force-no-store";
 
-export default async function SuperBusinessesPage({ searchParams }: { searchParams: { status?: string; plan?: string; industryType?: string; city?: string } }) {
+type SuperBusinessesSearchParams = { status?: string; plan?: string; industryType?: string; city?: string };
+
+export default async function SuperBusinessesPage({ searchParams }: { searchParams: Promise<SuperBusinessesSearchParams> }) {
+  const filters = await searchParams;
   const where = {
     deletedAt: null,
-    ...(searchParams.status && searchParams.status !== "ALL" ? { status: searchParams.status as never } : {}),
-    ...(searchParams.industryType && searchParams.industryType !== "ALL" ? { industryType: searchParams.industryType } : {}),
-    ...(searchParams.city ? { city: { contains: searchParams.city, mode: "insensitive" as const } } : {}),
-    ...(searchParams.plan && searchParams.plan !== "ALL" ? { subscription: { plan: searchParams.plan as never } } : {})
+    ...(filters.status && filters.status !== "ALL" ? { status: filters.status as never } : {}),
+    ...(filters.industryType && filters.industryType !== "ALL" ? { industryType: filters.industryType } : {}),
+    ...(filters.city ? { city: { contains: filters.city, mode: "insensitive" as const } } : {}),
+    ...(filters.plan && filters.plan !== "ALL" ? { subscription: { plan: filters.plan as never } } : {})
   };
   const businesses = await prisma.business.findMany({
     where,
@@ -44,18 +47,18 @@ export default async function SuperBusinessesPage({ searchParams }: { searchPara
       </div>
 
       <form className="mt-6 grid gap-3 rounded-lg border bg-white p-4 shadow-soft md:grid-cols-5">
-        <select name="industryType" defaultValue={searchParams.industryType || "ALL" } className="h-10 rounded-md border bg-white px-3 text-sm">
+        <select name="industryType" defaultValue={filters.industryType || "ALL" } className="h-10 rounded-md border bg-white px-3 text-sm">
           <option value="ALL">All industries</option>
           {INDUSTRY_TYPES.map((item) => <option key={item}>{item}</option>)}
         </select>
-        <input name="city" defaultValue={searchParams.city || ""} placeholder="City" className="h-10 rounded-md border px-3 text-sm" />
-        <select name="plan" defaultValue={searchParams.plan || "ALL"} className="h-10 rounded-md border bg-white px-3 text-sm">
+        <input name="city" defaultValue={filters.city || ""} placeholder="City" className="h-10 rounded-md border px-3 text-sm" />
+        <select name="plan" defaultValue={filters.plan || "ALL"} className="h-10 rounded-md border bg-white px-3 text-sm">
           <option value="ALL">All plans</option>
           <option value="STARTER">Starter</option>
           <option value="PRO">Pro</option>
           <option value="ENTERPRISE">Enterprise</option>
         </select>
-        <select name="status" defaultValue={searchParams.status || "ALL"} className="h-10 rounded-md border bg-white px-3 text-sm">
+        <select name="status" defaultValue={filters.status || "ALL"} className="h-10 rounded-md border bg-white px-3 text-sm">
           <option value="ALL">All status</option>
           <option value="ACTIVE">Active</option>
           <option value="DISABLED">Disabled</option>

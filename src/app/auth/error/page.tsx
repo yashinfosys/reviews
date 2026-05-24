@@ -8,8 +8,9 @@ const messages: Record<string, string> = {
   CredentialsSignin: "Invalid email or password."
 };
 
-export default function AuthErrorPage({ searchParams }: { searchParams: { error?: string } }) {
-  const message = messages[searchParams.error || ""] || "Authentication could not be completed.";
+export default async function AuthErrorPage({ searchParams }: { searchParams: Promise<{ error?: string }> }) {
+  const { error } = await searchParams;
+  const message = messages[error || ""] || "Authentication could not be completed.";
   return (
     <main className="grid min-h-screen place-items-center bg-slate-100 px-4">
       <div className="w-full max-w-md rounded-lg border bg-white p-6 text-center shadow-soft">

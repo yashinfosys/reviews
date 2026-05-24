@@ -5,14 +5,15 @@ import { isDemoMode } from "@/lib/demo-data";
 import { prisma } from "@/lib/prisma";
 import { writeAuditLog } from "@/lib/audit";
 
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const user = await requireUser(undefined, [Role.SUPER_ADMIN]);
   const body = await request.json();
   const status = body.status === "DISABLED" ? BusinessStatus.DISABLED : BusinessStatus.ACTIVE;
-  if (isDemoMode()) return NextResponse.json({ ok: true, id: params.id, status, demoMode: true });
+  if (isDemoMode()) return NextResponse.json({ ok: true, id, status, demoMode: true });
 
   const business = await prisma.business.update({
-    where: { id: params.id },
+    where: { id },
     data: {
       status,
       users: { updateMany: { where: { role: Role.BUSINESS_ADMIN }, data: { isActive: status === BusinessStatus.ACTIVE } } }

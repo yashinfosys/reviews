@@ -1,5 +1,6 @@
 import { GuestReviewPage } from "@/components/guest-review-page";
 
-export default function Page({ params }: { params: { businessSlug: string; roomNo: string } }) {
-  return <GuestReviewPage params={{ ...params, qrType: "Room", label: `Room ${params.roomNo}` }} />;
+export default async function Page({ params }: { params: Promise<{ businessSlug: string; roomNo: string }> }) {
+  const resolvedParams = await params;
+  return <GuestReviewPage params={{ ...resolvedParams, qrType: "Room", label: `Room ${resolvedParams.roomNo}` }} />;
 }

@@ -4,9 +4,10 @@ import { generateReviewReply } from "@/lib/ai";
 import { demoBusiness, demoReviews, isDemoMode } from "@/lib/demo-data";
 import { writeAuditLog } from "@/lib/audit";
 
-export async function POST(_request: Request, { params }: { params: { id: string } }) {
+export async function POST(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   if (isDemoMode()) {
-    const review = demoReviews.find((item) => item.id === params.id);
+    const review = demoReviews.find((item) => item.id === id);
     if (!review) return NextResponse.json({ error: "Review not found" }, { status: 404 });
     const reply = await generateReviewReply({
       businessName: demoBusiness.name,
@@ -20,7 +21,7 @@ export async function POST(_request: Request, { params }: { params: { id: string
     return NextResponse.json({ reply: { aiGeneratedReply: reply }, demoMode: true });
   }
 
-  const review = await prisma.review.findUnique({ where: { id: params.id }, include: { business: true } });
+  const review = await prisma.review.findUnique({ where: { id }, include: { business: true } });
   if (!review) return NextResponse.json({ error: "Review not found" }, { status: 404 });
   const reply = await generateReviewReply({
     businessName: review.business.name,

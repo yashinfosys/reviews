@@ -1,5 +1,6 @@
 import { GuestReviewPage } from "@/components/guest-review-page";
 
-export default function Page({ params }: { params: { businessSlug: string; tableNo: string } }) {
-  return <GuestReviewPage params={{ ...params, qrType: "Table", label: `Table ${params.tableNo}` }} />;
+export default async function Page({ params }: { params: Promise<{ businessSlug: string; tableNo: string }> }) {
+  const resolvedParams = await params;
+  return <GuestReviewPage params={{ ...resolvedParams, qrType: "Table", label: `Table ${resolvedParams.tableNo}` }} />;
 }

@@ -13,10 +13,11 @@ function numberOrUndefined(value: unknown) {
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : undefined;
 }
 
-export async function GET(_request: Request, { params }: { params: { id: string } }) {
+export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   await requireUser(undefined, [Role.SUPER_ADMIN]);
   const business = await prisma.business.findFirst({
-    where: { id: params.id, deletedAt: null },
+    where: { id, deletedAt: null },
     include: {
       users: { select: { id: true, name: true, email: true, mobile: true, role: true, isActive: true, mustChangePassword: true, createdAt: true } },
       subscription: true,
@@ -33,9 +34,9 @@ export async function GET(_request: Request, { params }: { params: { id: string 
   if (!business) return NextResponse.json({ error: "Business not found." }, { status: 404 });
 
   const [qrScanAggregate, ratingAggregate, pendingComplaints] = await Promise.all([
-    prisma.qRCode.aggregate({ where: { businessId: params.id }, _sum: { scanCount: true } }),
-    prisma.review.aggregate({ where: { businessId: params.id, rating: { not: null } }, _avg: { rating: true } }),
-    prisma.complaintTicket.count({ where: { businessId: params.id, status: { in: ["OPEN", "IN_PROGRESS"] } } })
+    prisma.qRCode.aggregate({ where: { businessId: id }, _sum: { scanCount: true } }),
+    prisma.review.aggregate({ where: { businessId: id, rating: { not: null } }, _avg: { rating: true } }),
+    prisma.complaintTicket.count({ where: { businessId: id, status: { in: ["OPEN", "IN_PROGRESS"] } } })
   ]);
 
   return NextResponse.json({
@@ -48,13 +49,14 @@ export async function GET(_request: Request, { params }: { params: { id: string 
   });
 }
 
-export async function PUT(request: Request, { params }: { params: { id: string } }) {
+export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const user = await requireUser(undefined, [Role.SUPER_ADMIN]);
   const body = await request.json();
   const plan = body.plan ? parsePlan(body.plan) : undefined;
 
   const business = await prisma.business.update({
-    where: { id: params.id },
+    where: { id },
     data: {
       name: body.name ? String(body.name).trim() : undefined,
       industryType: body.industryType ? String(body.industryType) : undefined,
@@ -102,20 +104,21 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     include: { subscription: true }
   });
 
-  await writeAuditLog({ businessId: params.id, userId: user.id, action: "BUSINESS_UPDATED", entity: "Business", entityId: params.id });
+  await writeAuditLog({ businessId: id, userId: user.id, action: "BUSINESS_UPDATED", entity: "Business", entityId: id });
   return NextResponse.json({ business });
 }
 
-export async function DELETE(_request: Request, { params }: { params: { id: string } }) {
+export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const user = await requireUser(undefined, [Role.SUPER_ADMIN]);
   const business = await prisma.business.update({
-    where: { id: params.id },
+    where: { id },
     data: {
       deletedAt: new Date(),
       status: BusinessStatus.DISABLED,
-      users: { updateMany: { where: { businessId: params.id }, data: { isActive: false } } }
+      users: { updateMany: { where: { businessId: id }, data: { isActive: false } } }
     }
   });
-  await writeAuditLog({ businessId: params.id, userId: user.id, action: "BUSINESS_SOFT_DELETED", entity: "Business", entityId: params.id });
+  await writeAuditLog({ businessId: id, userId: user.id, action: "BUSINESS_SOFT_DELETED", entity: "Business", entityId: id });
   return NextResponse.json({ business });
 }

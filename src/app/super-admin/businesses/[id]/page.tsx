@@ -7,9 +7,10 @@ import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-export default async function BusinessDetailPage({ params }: { params: { id: string } }) {
+export default async function BusinessDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const business = await prisma.business.findFirst({
-    where: { id: params.id, deletedAt: null },
+    where: { id, deletedAt: null },
     include: {
       users: { orderBy: { createdAt: "desc" } },
       subscription: true,

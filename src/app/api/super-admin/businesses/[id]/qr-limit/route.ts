@@ -5,7 +5,8 @@ import { isDemoMode } from "@/lib/demo-data";
 import { prisma } from "@/lib/prisma";
 import { writeAuditLog } from "@/lib/audit";
 
-export async function POST(request: Request, { params }: { params: { id: string } }) {
+export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const user = await requireUser(undefined, [Role.SUPER_ADMIN]);
   const body = await request.json();
   const isCustomLimitEnabled = Boolean(body.isCustomLimitEnabled);
@@ -16,12 +17,12 @@ export async function POST(request: Request, { params }: { params: { id: string 
   if (isDemoMode()) return NextResponse.json({ ok: true, demoMode: true });
 
   const subscription = await prisma.subscription.upsert({
-    where: { businessId: params.id },
+    where: { businessId: id },
     update: { isCustomLimitEnabled, customQrLimit },
-    create: { businessId: params.id, isCustomLimitEnabled, customQrLimit }
+    create: { businessId: id, isCustomLimitEnabled, customQrLimit }
   });
   await writeAuditLog({
-    businessId: params.id,
+    businessId: id,
     userId: user.id,
     action: "CUSTOM_QR_LIMIT_UPDATED",
     entity: "Subscription",
